@@ -2,8 +2,187 @@
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
+@source '../views/**/*.blade.php';
+@source '../../app/**/*.php';
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+    --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-serif: 'Playfair Display', Georgia, Cambria, 'Times New Roman', Times, serif;
+
+    --color-alabaster: #FAF7F2;
+    --color-sand: #E8E1D5;
+    --color-sand-soft: #F3EDE3;
+    --color-teak: #1F1A17;
+    --color-teak-soft: #2B2420;
+    --color-teak-card: #28211D;
+    --color-copper: #B85D3B;
+    --color-copper-dark: #9E4B2D;
+    --color-copper-tint: #FDF3EE;
+    --color-brass: #C69C6D;
+    --color-brass-tint: #FAF4EB;
+    --color-taupe: #6E655F;
+    --color-sage: #2E6F4E;
+    --color-sage-tint: #EAF4EF;
+    --color-saffron: #B7791F;
+    --color-saffron-tint: #FEF6E7;
+    --color-clay: #B83A3A;
+    --color-clay-tint: #FCECEC;
+}
+
+@view-transition {
+    navigation: auto;
+}
+
+@layer base {
+    body {
+        background-color: var(--color-alabaster);
+        color: var(--color-teak);
+        font-family: var(--font-sans);
+        font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    }
+
+    .tabular-nums {
+        font-variant-numeric: tabular-nums;
+    }
+
+    button:not(:disabled),
+    a[class*="bg-copper"],
+    a[class*="border-sand"] {
+        transition: transform 140ms cubic-bezier(0.22, 1, 0.36, 1),
+                    background-color 180ms ease,
+                    border-color 180ms ease,
+                    color 180ms ease,
+                    box-shadow 180ms ease;
+    }
+
+    button:not(:disabled):active,
+    a[class*="bg-copper"]:active {
+        transform: scale(0.98);
+    }
+}
+
+/* Native View Transition anchors: sidebar & topbar stay steady while main content glides */
+[data-vt="sidebar"] {
+    view-transition-name: kn-sidebar;
+}
+
+[data-vt="topbar"] {
+    view-transition-name: kn-topbar;
+}
+
+[data-vt="main"] {
+    view-transition-name: kn-main;
+}
+
+::view-transition-old(kn-main) {
+    animation: knVtOut 150ms cubic-bezier(0.4, 0, 1, 1) both;
+}
+
+::view-transition-new(kn-main) {
+    animation: knVtIn 240ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* GPU-accelerated keyframes (compositor-only: opacity + transform) */
+@keyframes knVtOut {
+    from { opacity: 1; transform: translate3d(0, 0, 0); }
+    to   { opacity: 0; transform: translate3d(0, -4px, 0); }
+}
+
+@keyframes knVtIn {
+    from { opacity: 0; transform: translate3d(0, 8px, 0); }
+    to   { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+@keyframes knFadeUp {
+    from { opacity: 0; transform: translate3d(0, 10px, 0); }
+    to   { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+@keyframes knSlideDown {
+    from { opacity: 0; transform: translate3d(0, -8px, 0); }
+    to   { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+@keyframes knGrowBar {
+    from { opacity: 0.3; transform: scaleY(0.08); }
+    to   { opacity: 1; transform: scaleY(1); }
+}
+
+@keyframes knPulseSoft {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50%      { transform: scale(1.45); opacity: 0.55; }
+}
+
+@keyframes knSpin {
+    to { transform: rotate(360deg); }
+}
+
+.kn-enter {
+    animation: knFadeUp 340ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.kn-toast {
+    animation: knSlideDown 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    transition: opacity 220ms ease, transform 220ms ease;
+}
+
+.kn-stagger > * {
+    animation: knFadeUp 360ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.kn-stagger > *:nth-child(1) { animation-delay: 0ms; }
+.kn-stagger > *:nth-child(2) { animation-delay: 35ms; }
+.kn-stagger > *:nth-child(3) { animation-delay: 70ms; }
+.kn-stagger > *:nth-child(4) { animation-delay: 105ms; }
+.kn-stagger > *:nth-child(5) { animation-delay: 140ms; }
+.kn-stagger > *:nth-child(6) { animation-delay: 175ms; }
+.kn-stagger > *:nth-child(n+7) { animation-delay: 210ms; }
+
+.kn-card-lift {
+    transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+                box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1),
+                border-color 180ms ease;
+    will-change: transform;
+}
+
+.kn-card-lift:hover {
+    transform: translate3d(0, -2px, 0);
+    box-shadow: 0 12px 28px -14px rgba(31, 26, 23, 0.16);
+}
+
+.kn-bar-grow {
+    transform-origin: bottom;
+    animation: knGrowBar 560ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.kn-pulse-dot {
+    animation: knPulseSoft 2s ease-in-out infinite;
+}
+
+.kn-spinner {
+    animation: knSpin 680ms linear infinite;
+}
+
+/* Respect OS accessibility setting for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+@media print {
+    .no-print {
+        display: none !important;
+    }
+
+    body {
+        background: #ffffff !important;
+    }
+
+    main {
+        padding: 0 !important;
+        margin: 0 !important;
+    }
 }

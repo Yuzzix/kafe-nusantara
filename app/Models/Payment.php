@@ -14,9 +14,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Payment extends Model
 {
     public const METHOD_CASH = 'cash';
+
     public const METHOD_QRIS = 'qris';
+
     public const METHOD_DEBIT = 'debit_card';
+
     public const METHOD_CREDIT = 'credit_card';
+
     public const METHOD_EWALLET = 'e_wallet';
 
     public const METHODS = [

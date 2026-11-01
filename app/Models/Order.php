@@ -29,6 +29,7 @@ class Order extends Model
 {
     // ----- order_type -----
     public const TYPE_DINE_IN = 'dine_in';
+
     public const TYPE_TAKEAWAY = 'takeaway';
 
     public const TYPES = [
@@ -38,9 +39,13 @@ class Order extends Model
 
     // ----- status (kitchen / service flow) -----
     public const STATUS_PENDING = 'pending';
+
     public const STATUS_PREPARING = 'preparing';
+
     public const STATUS_SERVED = 'served';
+
     public const STATUS_COMPLETED = 'completed';
+
     public const STATUS_CANCELLED = 'cancelled';
 
     public const STATUSES = [
@@ -60,6 +65,7 @@ class Order extends Model
 
     // ----- payment_status -----
     public const PAYMENT_UNPAID = 'unpaid';
+
     public const PAYMENT_PAID = 'paid';
 
     public const PAYMENT_STATUSES = [

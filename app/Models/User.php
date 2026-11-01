@@ -23,8 +23,11 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     public const ROLE_ADMIN = 'admin';
+
     public const ROLE_CASHIER = 'cashier';
+
     public const ROLE_WAITER = 'waiter';
+
     public const ROLE_KITCHEN = 'kitchen';
 
     /** Value => label, handy for <select> dropdowns in Blade. */
@@ -63,5 +66,32 @@ class User extends Authenticatable
     public function getRoleLabelAttribute(): string
     {
         return self::ROLES[$this->role] ?? ucfirst((string) $this->role);
+    }
+
+    public function getInitialsAttribute(): string
+    {
+        $words = preg_split('/\s+/', trim((string) $this->name)) ?: [];
+        $initials = collect($words)
+            ->filter()
+            ->take(2)
+            ->map(fn (string $word) => mb_strtoupper(mb_substr($word, 0, 1)))
+            ->join('');
+
+        return $initials !== '' ? $initials : 'KN';
+    }
+
+    /** Resolve the currently selected shift staff from session, defaulting to Siti (cashier). */
+    public static function currentShiftStaff(): ?self
+    {
+        $staffId = session('active_staff_id');
+        if ($staffId) {
+            $found = static::where('is_active', true)->find((int) $staffId);
+            if ($found) {
+                return $found;
+            }
+        }
+
+        return static::where('is_active', true)->where('email', 'kasir@kafe.test')->first()
+            ?? static::where('is_active', true)->first();
     }
 }

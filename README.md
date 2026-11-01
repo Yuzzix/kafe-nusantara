@@ -24,7 +24,7 @@ Pastikan sudah menginstal **PHP 8.3+**, **Composer**, **Node.js & NPM**, serta *
 git clone <URL_REPO_GITHUB> restoran-app
 cd restoran-app
 ```
-
+   
 ### 2. Nyalakan MySQL & buat database
 
 Nyalakan modul **MySQL** di XAMPP / Laragon, lalu buat database kosong bernama:

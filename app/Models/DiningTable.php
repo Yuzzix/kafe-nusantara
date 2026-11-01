@@ -17,7 +17,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class DiningTable extends Model
 {
     public const STATUS_AVAILABLE = 'available';
+
     public const STATUS_OCCUPIED = 'occupied';
+
     public const STATUS_RESERVED = 'reserved';
 
     public const STATUSES = [

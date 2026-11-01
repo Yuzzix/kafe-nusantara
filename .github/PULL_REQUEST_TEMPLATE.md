@@ -12,3 +12,4 @@
 - [ ] Tidak ada file `.env` atau kredensial lokal yang ikut ter-commit
 - [ ] Jika ada perubahan database, sudah dites dengan `php artisan migrate:fresh --seed`
 - [ ] Halaman / fitur sudah dites berjalan normal di `localhost`
+
