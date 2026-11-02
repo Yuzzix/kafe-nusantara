@@ -240,4 +240,41 @@ class RestaurantPosFlowTest extends TestCase
 
         $this->get(route('categories.create'))->assertRedirect(route('dashboard'));
     }
+
+    public function test_upfront_payment_keeps_table_occupied_and_order_in_kitchen_until_finished(): void
+    {
+        $freeTable = DiningTable::where('status', DiningTable::STATUS_AVAILABLE)->firstOrFail();
+        $menu = Menu::where('slug', 'nasi-goreng-spesial')->firstOrFail();
+
+        $this->post(route('orders.store'), [
+            'customer_name' => 'Farhan',
+            'order_type' => Order::TYPE_DINE_IN,
+            'dining_table_id' => $freeTable->id,
+            'items' => [
+                $menu->id => ['quantity' => 1],
+            ],
+        ]);
+
+        $order = Order::where('customer_name', 'Farhan')->latest('id')->firstOrFail();
+
+        // Customer pays IMMEDIATELY after ordering (before kitchen even cooks!)
+        $this->post(route('orders.pay', $order->order_number), [
+            'method' => Payment::METHOD_QRIS,
+        ])->assertSessionHas('success');
+
+        $order->refresh();
+        $this->assertSame(Order::PAYMENT_PAID, $order->payment_status);
+        $this->assertSame(Order::STATUS_PENDING, $order->status); // Still in kitchen queue!
+        $this->assertSame(DiningTable::STATUS_OCCUPIED, $freeTable->fresh()->status); // Seat still locked!
+
+        // Kitchen cooks and serves while seat remains occupied
+        $this->patch(route('orders.update-status', $order->order_number), ['status' => Order::STATUS_PREPARING]);
+        $this->patch(route('orders.update-status', $order->order_number), ['status' => Order::STATUS_SERVED]);
+        $this->assertSame(DiningTable::STATUS_OCCUPIED, $freeTable->fresh()->status);
+
+        // Customer finishes eating and leaves -> Staff closes order & frees table
+        $this->patch(route('orders.update-status', $order->order_number), ['status' => Order::STATUS_COMPLETED]);
+        $this->assertSame(Order::STATUS_COMPLETED, $order->fresh()->status);
+        $this->assertSame(DiningTable::STATUS_AVAILABLE, $freeTable->fresh()->status);
+    }
 }

@@ -102,10 +102,25 @@
 
                             <div class="mt-3 pt-2.5 border-t border-sand/70 text-[11px]">
                                 @if ($table->status === 'occupied' && $activeOrder)
-                                    <a href="{{ route('orders.show', $activeOrder->order_number) }}"
-                                       class="block font-bold text-copper hover:underline truncate tabular-nums">
-                                        {{ $activeOrder->order_number }} →
-                                    </a>
+                                    <div class="space-y-1.5">
+                                        <a href="{{ route('orders.show', $activeOrder->order_number) }}"
+                                           class="block font-bold text-copper hover:underline truncate tabular-nums">
+                                            {{ $activeOrder->order_number }} →
+                                        </a>
+                                        <p class="text-[10.5px] text-taupe">
+                                            {{ $activeOrder->isPaid() ? 'Lunas' : 'Belum Bayar' }} · {{ $activeOrder->status_label }}
+                                        </p>
+                                        @if ($activeOrder->isPaid() && $activeOrder->status === 'served')
+                                            <form action="{{ route('orders.update-status', $activeOrder->order_number) }}" method="POST">
+                                                @csrf
+                                                @method('PATCH')
+                                                <input type="hidden" name="status" value="completed">
+                                                <button type="submit" class="w-full mt-1 py-1 px-2 rounded bg-sage text-white text-[10.5px] font-bold hover:opacity-95 transition cursor-pointer">
+                                                    ✓ Kosongkan Meja
+                                                </button>
+                                            </form>
+                                        @endif
+                                    </div>
                                 @elseif ($table->status === 'available')
                                     <div class="flex items-center justify-between gap-1">
                                         <a href="{{ route('orders.create', ['table' => $table->number]) }}"

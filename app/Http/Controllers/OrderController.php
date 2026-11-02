@@ -261,34 +261,51 @@ class OrderController extends Controller
                 Order::STATUS_PENDING,
                 Order::STATUS_PREPARING,
                 Order::STATUS_SERVED,
+                Order::STATUS_COMPLETED,
                 Order::STATUS_CANCELLED,
             ])],
         ]);
 
-        if ($order->isPaid()) {
-            return back()->with('error', 'Pesanan yang sudah lunas tidak dapat diubah lagi status dapurnya.');
+        if ($order->status === Order::STATUS_COMPLETED) {
+            return back()->with('error', 'Pesanan ini sudah selesai dan ditutup sebelumnya.');
         }
 
         if ($order->status === Order::STATUS_CANCELLED) {
             return back()->with('error', 'Pesanan ini sudah dibatalkan sebelumnya.');
         }
 
+        if ($validated['status'] === Order::STATUS_CANCELLED && $order->isPaid()) {
+            return back()->with('error', 'Pesanan yang sudah lunas tidak dapat dibatalkan.');
+        }
+
+        if ($validated['status'] === Order::STATUS_COMPLETED && ! $order->isPaid()) {
+            return back()->with('error', 'Selesaikan pembayaran di Kasir terlebih dahulu sebelum menutup pesanan & mengosongkan meja.');
+        }
+
         $staff = User::currentShiftStaff();
-        if ($staff?->role === User::ROLE_KITCHEN && $validated['status'] === Order::STATUS_CANCELLED) {
-            return back()->with('error', ' Pembatalan pesanan hanya dapat dilakukan oleh Pelayan, Kasir, atau Admin.');
+        if ($staff?->role === User::ROLE_KITCHEN && in_array($validated['status'], [Order::STATUS_CANCELLED, Order::STATUS_COMPLETED], true)) {
+            return back()->with('error', 'Tindakan ini hanya dapat dilakukan oleh Pelayan, Kasir, atau Admin.');
         }
 
         DB::transaction(function () use ($order, $validated): void {
-            $order->update([
-                'status' => $validated['status'],
-            ]);
+            $payload = ['status' => $validated['status']];
+            if ($validated['status'] === Order::STATUS_COMPLETED) {
+                $payload['completed_at'] = now();
+            }
 
-            if ($validated['status'] === Order::STATUS_CANCELLED && $order->dining_table_id) {
+            $order->update($payload);
+
+            if (in_array($validated['status'], [Order::STATUS_CANCELLED, Order::STATUS_COMPLETED], true) && $order->dining_table_id) {
                 $this->syncTableOccupancy($order->dining_table_id);
             }
         });
 
-        return back()->with('success', "Status dapur pesanan {$order->order_number} diperbarui menjadi {$order->fresh()->status_label}.");
+        $freshOrder = $order->fresh();
+        $msg = $validated['status'] === Order::STATUS_COMPLETED
+            ? "Pesanan {$order->order_number} selesai ditutup dan meja telah dikembalikan ke status Tersedia."
+            : "Status pesanan {$order->order_number} diperbarui menjadi {$freshOrder->status_label}.";
+
+        return back()->with('success', $msg);
     }
 
     public function pay(Request $request, Order $order): RedirectResponse
@@ -343,19 +360,28 @@ class OrderController extends Controller
                 'paid_at' => now(),
             ]);
 
+            // Only auto-complete & free the table if food has ALREADY been served (Pay-After-Eating).
+            // If customer pays upfront while food is still pending/preparing, keep kitchen ticket active & table occupied!
+            $alreadyServed = $order->status === Order::STATUS_SERVED;
+
             $order->update([
                 'payment_status' => Order::PAYMENT_PAID,
-                'status' => Order::STATUS_COMPLETED,
-                'completed_at' => now(),
+                'status' => $alreadyServed ? Order::STATUS_COMPLETED : $order->status,
+                'completed_at' => $alreadyServed ? now() : $order->completed_at,
                 'user_id' => $order->user_id ?? $staff?->id,
             ]);
 
-            if ($order->dining_table_id) {
+            if ($alreadyServed && $order->dining_table_id) {
                 $this->syncTableOccupancy($order->dining_table_id);
             }
         });
 
-        return back()->with('success', "Pembayaran {$order->order_number} berhasil dikonfirmasi! Status pesanan kini Lunas & Selesai.");
+        $paidOrder = $order->fresh();
+        $successNote = $paidOrder->status === Order::STATUS_COMPLETED
+            ? "Pembayaran {$order->order_number} lunas! Pesanan selesai dan meja kembali Tersedia."
+            : "Pembayaran {$order->order_number} tercatat Lunas! Pesanan tetap diproses dapur & meja tetap Terisi hingga pelanggan selesai.";
+
+        return back()->with('success', $successNote);
     }
 
     private function filteredOrdersQuery(Request $request): Builder

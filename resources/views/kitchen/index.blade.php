@@ -225,13 +225,15 @@
 
                     <div class="flex items-center justify-between text-xs">
                         <span class="font-bold text-teak tabular-nums">{{ $order->formatted_total }}</span>
-                        @if ($canProcessPayment)
+                        @if ($order->isPaid())
+                            <span class="text-sage font-semibold">Lunas · Sedang Makan</span>
+                        @elseif ($canProcessPayment)
                             <a href="{{ route('orders.show', $order->order_number) }}"
                                class="font-bold text-copper hover:underline">
                                 Proses Kasir →
                             </a>
                         @else
-                            <span class="text-sage font-semibold">Menunggu Kasir</span>
+                            <span class="text-saffron font-semibold">Menunggu Kasir</span>
                         @endif
                     </div>
                 </div>

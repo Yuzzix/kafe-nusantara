@@ -53,12 +53,18 @@
         </div>
     </div>
 
-    {{-- Kitchen Workflow Action Strip (When Unpaid & Not Cancelled — solves the static-badge gap!) --}}
-    @if (! $order->isPaid() && $order->status !== 'cancelled')
+    {{-- Kitchen & Table Lifecycle Action Strip (Works for BOTH Unpaid & Paid-Upfront Active Orders!) --}}
+    @if (! in_array($order->status, ['completed', 'cancelled'], true))
         <div class="no-print mb-5 bg-white rounded-lg border border-sand px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
             <div class="flex items-center gap-2.5 text-xs">
-                <span class="font-bold text-teak">Alur Dapur & Sajian:</span>
-                <span class="text-taupe">Perbarui progres sebelum atau sesudah hidangan diantar ke meja pelanggan.</span>
+                <span class="font-bold text-teak">Alur Dapur & Meja:</span>
+                @if ($order->isPaid() && $order->status === 'served')
+                    <span class="text-taupe">Hidangan sudah disajikan & tagihan <strong>Lunas</strong>. Klik tombol di samping saat pelanggan meninggalkan meja.</span>
+                @elseif ($order->isPaid())
+                    <span class="text-taupe">Tagihan sudah <strong>Lunas di awal</strong>. Meja tetap terkunci <strong>Terisi</strong> sampai hidangan disajikan & pelanggan selesai.</span>
+                @else
+                    <span class="text-taupe">Perbarui progres sebelum atau sesudah hidangan diantar ke meja pelanggan.</span>
+                @endif
             </div>
 
             <div class="flex flex-wrap items-center gap-2">
@@ -67,7 +73,7 @@
                         @csrf
                         @method('PATCH')
                         <input type="hidden" name="status" value="preparing">
-                        <button type="submit" class="px-3.5 py-1.5 rounded-xl bg-saffron-tint border border-saffron/30 text-xs font-bold text-saffron hover:bg-saffron hover:text-white transition cursor-pointer">
+                        <button type="submit" class="px-3.5 py-1.5 rounded-lg bg-saffron-tint border border-saffron/30 text-xs font-bold text-saffron hover:bg-saffron hover:text-white transition cursor-pointer">
                             Mulai Proses Dapur →
                         </button>
                     </form>
@@ -78,22 +84,35 @@
                         @csrf
                         @method('PATCH')
                         <input type="hidden" name="status" value="served">
-                        <button type="submit" class="px-3.5 py-1.5 rounded-xl bg-sage-tint border border-sage/30 text-xs font-bold text-sage hover:bg-sage hover:text-white transition cursor-pointer">
+                        <button type="submit" class="px-3.5 py-1.5 rounded-lg bg-sage-tint border border-sage/30 text-xs font-bold text-sage hover:bg-sage hover:text-white transition cursor-pointer">
                             ✓ Tandai Sudah Disajikan
                         </button>
                     </form>
                 @endif
 
-                <form action="{{ route('orders.update-status', $order->order_number) }}"
-                      method="POST"
-                      onsubmit="return confirm('Batalkan pesanan {{ $order->order_number }}? Meja terkait akan otomatis dibebaskan.')">
-                    @csrf
-                    @method('PATCH')
-                    <input type="hidden" name="status" value="cancelled">
-                    <button type="submit" class="px-3 py-1.5 rounded-xl border border-sand text-xs font-semibold text-clay hover:bg-clay-tint transition cursor-pointer">
-                        Batalkan Pesanan
-                    </button>
-                </form>
+                @if ($order->isPaid() && $order->status === 'served')
+                    <form action="{{ route('orders.update-status', $order->order_number) }}" method="POST">
+                        @csrf
+                        @method('PATCH')
+                        <input type="hidden" name="status" value="completed">
+                        <button type="submit" class="px-3.5 py-1.5 rounded-lg bg-sage text-white text-xs font-bold hover:opacity-95 transition cursor-pointer">
+                            ✓ Selesai & Kosongkan Meja
+                        </button>
+                    </form>
+                @endif
+
+                @if (! $order->isPaid())
+                    <form action="{{ route('orders.update-status', $order->order_number) }}"
+                          method="POST"
+                          onsubmit="return confirm('Batalkan pesanan {{ $order->order_number }}? Meja terkait akan otomatis dibebaskan.')">
+                        @csrf
+                        @method('PATCH')
+                        <input type="hidden" name="status" value="cancelled">
+                        <button type="submit" class="px-3 py-1.5 rounded-lg border border-sand text-xs font-semibold text-clay hover:bg-clay-tint transition cursor-pointer">
+                            Batalkan Pesanan
+                        </button>
+                    </form>
+                @endif
             </div>
         </div>
     @endif
@@ -387,7 +406,11 @@
                     </button>
 
                     <p class="text-[11px] text-taupe leading-relaxed">
-                        Pembayaran belum diterima. Status pesanan akan menjadi <strong>Lunas & Selesai</strong> dan meja otomatis kembali <strong>Tersedia</strong> setelah dikonfirmasi kasir.
+                        @if ($order->status === 'served')
+                            Hidangan telah disajikan. Setelah pembayaran dikonfirmasi, pesanan ditandai <strong>Selesai</strong> dan meja otomatis kembali <strong>Tersedia</strong>.
+                        @else
+                            Pembayaran di awal: tagihan tercatat <strong>Lunas</strong>, sedangkan antrean dapur tetap berjalan dan meja tetap <strong>Terisi</strong> sampai pelanggan selesai.
+                        @endif
                     </p>
                 </form>
             @endif

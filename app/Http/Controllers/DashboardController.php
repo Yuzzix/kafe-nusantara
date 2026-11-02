@@ -15,17 +15,17 @@ class DashboardController extends Controller
 {
     public function index(): View
     {
-        // Today's metrics
-        $todayCompletedQuery = Order::where('status', Order::STATUS_COMPLETED)
+        // Today's paid revenue metrics (counts both Pay-Upfront and Pay-After-Eating!)
+        $todayPaidQuery = Order::where('payment_status', Order::PAYMENT_PAID)
             ->whereDate('created_at', today());
-        $todayRevenue = (int) (clone $todayCompletedQuery)->sum('total');
-        $todayCompletedCount = (clone $todayCompletedQuery)->count();
+        $todayRevenue = (int) (clone $todayPaidQuery)->sum('total');
+        $todayCompletedCount = (clone $todayPaidQuery)->count();
 
-        // 30-day revenue summary
-        $monthRevenue = (int) Order::where('status', Order::STATUS_COMPLETED)
+        // 30-day paid revenue summary
+        $monthRevenue = (int) Order::where('payment_status', Order::PAYMENT_PAID)
             ->where('created_at', '>=', today()->subDays(29))
             ->sum('total');
-        $monthOrdersCount = Order::where('status', Order::STATUS_COMPLETED)
+        $monthOrdersCount = Order::where('payment_status', Order::PAYMENT_PAID)
             ->where('created_at', '>=', today()->subDays(29))
             ->count();
 
@@ -45,7 +45,7 @@ class DashboardController extends Controller
         ];
 
         // 7-day daily revenue trend (works cleanly on both MySQL & SQLite)
-        $recentCompleted = Order::where('status', Order::STATUS_COMPLETED)
+        $recentCompleted = Order::where('payment_status', Order::PAYMENT_PAID)
             ->where('created_at', '>=', today()->subDays(6)->startOfDay())
             ->get(['total', 'created_at'])
             ->groupBy(fn (Order $order) => $order->created_at->format('Y-m-d'));
