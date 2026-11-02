@@ -1,28 +1,30 @@
 @props(['category'])
 
 <a href="{{ route('categories.show', $category->slug) }}"
-   class="kn-card-lift group bg-white rounded-2xl border border-sand p-6 flex flex-col justify-between hover:border-copper/50">
+   class="kn-card-lift group bg-white rounded-lg border border-sand hover:border-copper/60 p-5 flex flex-col justify-between shadow-2xs">
     <div>
-        <div class="flex items-start justify-between gap-3 mb-5">
-            <x-category-icon :slug="$category->slug" :icon="$category->icon" />
-            <x-status-badge :tone="$category->is_active ? 'sage' : 'neutral'" :label="$category->is_active ? 'Aktif' : 'Tidak aktif'" />
+        <div class="flex items-center justify-between gap-3 mb-3.5">
+            <div class="flex items-center gap-3 min-w-0">
+                <x-category-icon :slug="$category->slug" :icon="$category->icon" />
+                <div class="min-w-0">
+                    <h3 class="text-base font-bold text-teak group-hover:text-copper transition truncate">
+                        {{ $category->name }}
+                    </h3>
+                    <p class="text-[11px] font-medium text-taupe tabular-nums">Urutan #{{ $category->sort_order }}</p>
+                </div>
+            </div>
+            <x-status-badge :tone="$category->is_active ? 'sage' : 'neutral'" :label="$category->is_active ? 'Aktif' : 'Nonaktif'" />
         </div>
 
-        <h3 class="text-lg font-bold text-teak group-hover:text-copper transition">
-            {{ $category->name }}
-        </h3>
-        <p class="text-sm text-taupe mt-1.5 leading-relaxed line-clamp-2">
-            {{ $category->description ?: 'Kelompok sajian pilihan Kafe Nusantara.' }}
+        <p class="text-xs text-taupe leading-relaxed line-clamp-2">
+            {{ $category->description ?: 'Daftar menu dalam kategori ini.' }}
         </p>
     </div>
 
-    <div class="mt-6 pt-4 border-t border-sand/70 flex items-center justify-between text-sm">
-        <span class="font-semibold text-teak tabular-nums">{{ $category->menus_count }} menu</span>
-        <span class="inline-flex items-center gap-1 font-semibold text-copper group-hover:translate-x-0.5 transition">
-            Lihat menu
-            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M7 17 17 7M7 7h10v10"/>
-            </svg>
+    <div class="mt-4 pt-3 border-t border-sand/70 flex items-center justify-between text-xs">
+        <span class="font-bold text-teak tabular-nums">{{ $category->menus_count }} item menu</span>
+        <span class="font-semibold text-copper group-hover:underline">
+            Buka rincian →
         </span>
     </div>
 </a>

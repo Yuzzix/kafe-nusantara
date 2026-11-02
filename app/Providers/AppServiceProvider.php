@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\Order;
 use App\Models\User;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Schema;
@@ -28,6 +29,7 @@ class AppServiceProvider extends ServiceProvider
         View::composer('partials.sidebar', function ($view): void {
             $staffList = collect();
             $activeStaff = null;
+            $kitchenQueueCount = 0;
 
             try {
                 if (Schema::hasTable('users')) {
@@ -41,6 +43,13 @@ class AppServiceProvider extends ServiceProvider
                     $activeStaff ??= $staffList->firstWhere('email', 'kasir@kafe.test')
                         ?? $staffList->first();
                 }
+
+                if (Schema::hasTable('orders')) {
+                    $kitchenQueueCount = Order::whereIn('status', [
+                        Order::STATUS_PENDING,
+                        Order::STATUS_PREPARING,
+                    ])->count();
+                }
             } catch (\Throwable) {
                 // Safe fallback if database is not migrated yet.
             }
@@ -48,6 +57,7 @@ class AppServiceProvider extends ServiceProvider
             $view->with([
                 'staffList' => $staffList,
                 'activeStaff' => $activeStaff,
+                'kitchenQueueCount' => $kitchenQueueCount,
             ]);
         });
     }

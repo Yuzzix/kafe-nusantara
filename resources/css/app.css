@@ -10,24 +10,24 @@
         'Segoe UI Symbol', 'Noto Color Emoji';
     --font-serif: 'Playfair Display', Georgia, Cambria, 'Times New Roman', Times, serif;
 
-    --color-alabaster: #FAF7F2;
-    --color-sand: #E8E1D5;
-    --color-sand-soft: #F3EDE3;
-    --color-teak: #1F1A17;
-    --color-teak-soft: #2B2420;
-    --color-teak-card: #28211D;
-    --color-copper: #B85D3B;
-    --color-copper-dark: #9E4B2D;
-    --color-copper-tint: #FDF3EE;
-    --color-brass: #C69C6D;
-    --color-brass-tint: #FAF4EB;
-    --color-taupe: #6E655F;
-    --color-sage: #2E6F4E;
-    --color-sage-tint: #EAF4EF;
-    --color-saffron: #B7791F;
-    --color-saffron-tint: #FEF6E7;
-    --color-clay: #B83A3A;
-    --color-clay-tint: #FCECEC;
+    --color-alabaster: #F5F4F0;
+    --color-sand: #DDD8CE;
+    --color-sand-soft: #ECE9E2;
+    --color-teak: #1B1917;
+    --color-teak-soft: #272320;
+    --color-teak-card: #221F1C;
+    --color-copper: #A84C28;
+    --color-copper-dark: #8D3D1E;
+    --color-copper-tint: #FBF1EC;
+    --color-brass: #B88B58;
+    --color-brass-tint: #F7F0E4;
+    --color-taupe: #655E57;
+    --color-sage: #266344;
+    --color-sage-tint: #E8F2EC;
+    --color-saffron: #A36814;
+    --color-saffron-tint: #FDF4E3;
+    --color-clay: #A93535;
+    --color-clay-tint: #FBEAEA;
 }
 
 @view-transition {
@@ -139,15 +139,14 @@
 .kn-stagger > *:nth-child(n+7) { animation-delay: 210ms; }
 
 .kn-card-lift {
-    transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
-                box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1),
-                border-color 180ms ease;
-    will-change: transform;
+    transition: transform 160ms ease,
+                box-shadow 160ms ease,
+                border-color 160ms ease;
 }
 
 .kn-card-lift:hover {
-    transform: translate3d(0, -2px, 0);
-    box-shadow: 0 12px 28px -14px rgba(31, 26, 23, 0.16);
+    transform: translate3d(0, -1px, 0);
+    box-shadow: 0 6px 16px -10px rgba(27, 25, 23, 0.14);
 }
 
 .kn-bar-grow {
@@ -163,6 +162,40 @@
     animation: knSpin 680ms linear infinite;
 }
 
+/* Artisanal Javanese Floral Batik (Kawung Melati & Cecek) filigree surfaces */
+.kn-batik-sidebar {
+    background-color: #191614;
+    background-image:
+        radial-gradient(circle at 15% 8%, rgba(212, 165, 106, 0.16), transparent 42%),
+        radial-gradient(circle at 85% 94%, rgba(168, 76, 40, 0.18), transparent 45%),
+        linear-gradient(180deg, rgba(25, 22, 20, 0.15) 0%, rgba(25, 22, 20, 0.52) 48%, rgba(25, 22, 20, 0.18) 100%),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cg fill='none' stroke='%23D4A56A' stroke-opacity='0.145' stroke-width='0.95'%3E%3Cpath d='M40 0 Q56 24 80 40 Q56 56 40 80 Q24 56 0 40 Q24 24 40 0Z'/%3E%3Cpath d='M40 40 C33 29 33 15 40 6 C47 15 47 29 40 40Z'/%3E%3Cpath d='M40 40 C33 51 33 65 40 74 C47 65 47 51 40 40Z'/%3E%3Cpath d='M40 40 C29 33 15 33 6 40 C15 47 29 47 40 40Z'/%3E%3Cpath d='M40 40 C51 33 65 33 74 40 C65 47 51 47 40 40Z'/%3E%3Cpath d='M40 40 C44 28 52 22 61 19 C58 28 52 36 40 40Z'/%3E%3Cpath d='M40 40 C36 28 28 22 19 19 C22 28 28 36 40 40Z'/%3E%3Cpath d='M40 40 C44 52 52 58 61 61 C58 52 52 44 40 40Z'/%3E%3Cpath d='M40 40 C36 52 28 58 19 61 C22 52 28 44 40 40Z'/%3E%3Ccircle cx='40' cy='40' r='5.2'/%3E%3Ccircle cx='0' cy='0' r='11'/%3E%3Ccircle cx='80' cy='0' r='11'/%3E%3Ccircle cx='0' cy='80' r='11'/%3E%3Ccircle cx='80' cy='80' r='11'/%3E%3Ccircle cx='0' cy='0' r='5'/%3E%3Ccircle cx='80' cy='0' r='5'/%3E%3Ccircle cx='0' cy='80' r='5'/%3E%3Ccircle cx='80' cy='80' r='5'/%3E%3C/g%3E%3Cg fill='%23D4A56A' fill-opacity='0.18'%3E%3Ccircle cx='40' cy='40' r='1.7'/%3E%3Ccircle cx='40' cy='18' r='1.1'/%3E%3Ccircle cx='40' cy='62' r='1.1'/%3E%3Ccircle cx='18' cy='40' r='1.1'/%3E%3Ccircle cx='62' cy='40' r='1.1'/%3E%3Ccircle cx='40' cy='0' r='1.4'/%3E%3Ccircle cx='40' cy='80' r='1.4'/%3E%3Ccircle cx='0' cy='40' r='1.4'/%3E%3Ccircle cx='80' cy='40' r='1.4'/%3E%3C/g%3E%3C/svg%3E");
+    background-size: 100% 100%, 100% 100%, 100% 100%, 76px 76px;
+}
+
+.kn-batik-banner {
+    background-color: #191614;
+    background-image:
+        radial-gradient(circle at 90% 15%, rgba(212, 165, 106, 0.2), transparent 46%),
+        radial-gradient(circle at 10% 85%, rgba(168, 76, 40, 0.16), transparent 45%),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cg fill='none' stroke='%23D4A56A' stroke-opacity='0.13' stroke-width='0.95'%3E%3Cpath d='M40 0 Q56 24 80 40 Q56 56 40 80 Q24 56 0 40 Q24 24 40 0Z'/%3E%3Cpath d='M40 40 C33 29 33 15 40 6 C47 15 47 29 40 40Z'/%3E%3Cpath d='M40 40 C33 51 33 65 40 74 C47 65 47 51 40 40Z'/%3E%3Cpath d='M40 40 C29 33 15 33 6 40 C15 47 29 47 40 40Z'/%3E%3Cpath d='M40 40 C51 33 65 33 74 40 C65 47 51 47 40 40Z'/%3E%3Cpath d='M40 40 C44 28 52 22 61 19 C58 28 52 36 40 40Z'/%3E%3Cpath d='M40 40 C36 28 28 22 19 19 C22 28 28 36 40 40Z'/%3E%3Cpath d='M40 40 C44 52 52 58 61 61 C58 52 52 44 40 40Z'/%3E%3Cpath d='M40 40 C36 52 28 58 19 61 C22 52 28 44 40 40Z'/%3E%3Ccircle cx='40' cy='40' r='5.2'/%3E%3Ccircle cx='0' cy='0' r='11'/%3E%3Ccircle cx='80' cy='0' r='11'/%3E%3Ccircle cx='0' cy='80' r='11'/%3E%3Ccircle cx='80' cy='80' r='11'/%3E%3C/g%3E%3Cg fill='%23D4A56A' fill-opacity='0.16'%3E%3Ccircle cx='40' cy='40' r='1.7'/%3E%3Ccircle cx='40' cy='18' r='1.1'/%3E%3Ccircle cx='40' cy='62' r='1.1'/%3E%3Ccircle cx='18' cy='40' r='1.1'/%3E%3Ccircle cx='62' cy='40' r='1.1'/%3E%3C/g%3E%3C/svg%3E");
+    background-size: 100% 100%, 100% 100%, 76px 76px;
+}
+
+.kn-batik-card-light {
+    background-color: #FFFFFF;
+    background-image:
+        linear-gradient(90deg, #FFFFFF 0%, #FFFFFF 55%, rgba(255, 255, 255, 0.72) 100%),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cg fill='none' stroke='%23B88B58' stroke-opacity='0.14' stroke-width='0.95'%3E%3Cpath d='M40 0 Q56 24 80 40 Q56 56 40 80 Q24 56 0 40 Q24 24 40 0Z'/%3E%3Cpath d='M40 40 C33 29 33 15 40 6 C47 15 47 29 40 40Z'/%3E%3Cpath d='M40 40 C33 51 33 65 40 74 C47 65 47 51 40 40Z'/%3E%3Cpath d='M40 40 C29 33 15 33 6 40 C15 47 29 47 40 40Z'/%3E%3Cpath d='M40 40 C51 33 65 33 74 40 C65 47 51 47 40 40Z'/%3E%3Cpath d='M40 40 C44 28 52 22 61 19 C58 28 52 36 40 40Z'/%3E%3Cpath d='M40 40 C36 28 28 22 19 19 C22 28 28 36 40 40Z'/%3E%3Cpath d='M40 40 C44 52 52 58 61 61 C58 52 52 44 40 40Z'/%3E%3Cpath d='M40 40 C36 52 28 58 19 61 C22 52 28 44 40 40Z'/%3E%3Ccircle cx='40' cy='40' r='5.2'/%3E%3C/g%3E%3C/svg%3E");
+    background-size: 100% 100%, 72px 72px;
+}
+
+.kn-receipt-edge {
+    background-image: radial-gradient(circle at 6px 0, transparent 4px, #ffffff 4.5px);
+    background-size: 12px 8px;
+    background-repeat: repeat-x;
+}
+
 /* Respect OS accessibility setting for reduced motion */
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
@@ -173,12 +206,18 @@
 }
 
 @media print {
-    .no-print {
+    .no-print,
+    .kn-screen-only {
         display: none !important;
+    }
+
+    .kn-print-only {
+        display: block !important;
     }
 
     body {
         background: #ffffff !important;
+        color: #1F1A17 !important;
     }
 
     main {

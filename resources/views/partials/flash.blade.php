@@ -1,6 +1,6 @@
 @if (session('success'))
-    <div data-kn-autodismiss class="kn-toast mb-2 flex items-center justify-between gap-3 rounded-xl bg-sage-tint border border-sage/25 px-4 py-3 text-sm text-sage font-medium shadow-2xs">
-        <div class="flex items-center gap-2.5">
+    <div data-kn-autodismiss class="kn-toast mb-2 flex items-center justify-between gap-3 rounded-lg bg-sage-tint border border-sage/25 border-l-[3px] border-l-sage px-4 py-2.5 text-xs text-sage font-semibold shadow-2xs">
+        <div class="flex items-center gap-2">
             <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M20 6 9 17l-5-5"/>
             </svg>
@@ -11,8 +11,8 @@
 @endif
 
 @if (session('error'))
-    <div class="kn-toast mb-2 flex items-center justify-between gap-3 rounded-xl bg-clay-tint border border-clay/25 px-4 py-3 text-sm text-clay font-medium shadow-2xs">
-        <div class="flex items-center gap-2.5">
+    <div class="kn-toast mb-2 flex items-center justify-between gap-3 rounded-lg bg-clay-tint border border-clay/25 border-l-[3px] border-l-clay px-4 py-2.5 text-xs text-clay font-semibold shadow-2xs">
+        <div class="flex items-center gap-2">
             <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
                 <circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/>
             </svg>
@@ -23,7 +23,7 @@
 @endif
 
 @if ($errors->any())
-    <div class="kn-toast mb-2 rounded-xl bg-clay-tint border border-clay/25 px-4 py-3 text-sm text-clay shadow-2xs">
+    <div class="kn-toast mb-2 rounded-lg bg-clay-tint border border-clay/25 border-l-[3px] border-l-clay px-4 py-3 text-xs text-clay shadow-2xs">
         <p class="font-semibold mb-1">Mohon periksa kembali isian formulir:</p>
         <ul class="list-disc list-inside space-y-0.5 text-xs">
             @foreach ($errors->all() as $error)

@@ -2,44 +2,33 @@
 
 @section('title', 'Buat Pesanan Baru')
 @section('breadcrumb')
-    <a href="{{ route('orders.index') }}" class="hover:text-copper">Ruang kerja / Pesanan & Kasir</a> / Pesanan Baru
+    <a href="{{ route('orders.index') }}" class="hover:text-copper">Beranda / Pesanan & Kasir</a> / Transaksi Baru
 @endsection
 @section('page_title', 'Buat Pesanan Baru')
 
 @section('header_actions')
+    <a href="{{ route('orders.index') }}"
+       class="px-3 py-2 rounded-lg border border-sand bg-white text-xs font-semibold text-teak hover:bg-alabaster transition">
+        Batal
+    </a>
     <button type="submit"
             form="pos-order-form"
-            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-copper hover:bg-copper-dark text-white text-sm font-semibold shadow-sm transition cursor-pointer">
-        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M20 6 9 17l-5-5"/>
-        </svg>
-        <span>Simpan Pesanan</span>
+            class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-copper hover:bg-copper-dark text-white text-xs font-semibold shadow-2xs transition cursor-pointer">
+        <span>Simpan & Kirim ke Dapur</span>
     </button>
 @endsection
 
 @section('content')
-    {{-- Page Intro (Matches PDF Page 7) --}}
-    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-6">
-        <div>
-            <h2 class="text-xl font-bold text-teak">Mulai pelayanan baru</h2>
-            <p class="text-sm text-taupe mt-0.5">
-                Pilih meja tersedia (atau nomor stand meja), tambahkan sajian, lalu kirim pesanan ke dapur.
-            </p>
-        </div>
-
-        <x-status-badge tone="saffron" label="Draf belum disimpan" />
-    </div>
-
     <form id="pos-order-form" action="{{ route('orders.store') }}" method="POST">
         @csrf
         <input type="hidden" name="order_type" id="order-type-input" value="{{ old('order_type', 'dine_in') }}">
         <input type="hidden" name="dining_table_id" id="dining-table-input" value="{{ old('dining_table_id', $preselectedTableId) }}">
 
-        <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
+        <div class="grid grid-cols-1 xl:grid-cols-12 gap-5 items-start">
             {{-- Left 8 Columns: Customer, Order Type, Table Picker, & Menu Selector --}}
-            <div class="xl:col-span-8 space-y-6">
+            <div class="xl:col-span-8 space-y-5">
                 {{-- Card 1: Customer Name, Order Type Toggle, & Available Table Cards --}}
-                <div class="bg-white rounded-2xl border border-sand p-6 space-y-5">
+                <div class="bg-white rounded-lg border border-sand p-5 space-y-4 shadow-2xs">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label for="customer_name" class="block text-xs font-bold text-teak mb-1.5">
@@ -111,8 +100,8 @@
                     </div>
                 </div>
 
-                {{-- Card 2: Interactive Menu Selector (Matches PDF Page 7) --}}
-                <div class="bg-white rounded-2xl border border-sand p-6">
+                {{-- Card 2: Interactive Menu Selector --}}
+                <div class="bg-white rounded-lg border border-sand p-5 shadow-2xs">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
                         <h3 class="text-base font-bold text-teak">Pilih Menu</h3>
 
@@ -151,7 +140,7 @@
                                     $oldQty = (int) old("items.{$menu->id}.quantity", 0);
                                     $oldNotes = old("items.{$menu->id}.notes", '');
                                 @endphp
-                                <div class="pos-menu-row rounded-2xl border p-4 transition"
+                                <div class="pos-menu-row rounded-lg border p-3.5 transition"
                                      data-menu-id="{{ $menu->id }}"
                                      data-menu-name="{{ $menu->name }}"
                                      data-menu-search="{{ mb_strtolower($menu->name.' '.$category->name) }}"
@@ -159,10 +148,14 @@
                                      data-menu-price="{{ $menu->price }}">
                                     <div class="flex items-center justify-between gap-4">
                                         <div class="flex items-center gap-3.5 min-w-0">
-                                            @if ($menu->image)
-                                                <img src="{{ asset('storage/'.$menu->image) }}"
-                                                     alt="{{ $menu->name }}"
-                                                     class="w-11 h-11 rounded-xl object-cover border border-sand shrink-0">
+                                            @if ($menu->image_url)
+                                                <div class="w-12 h-12 rounded-xl overflow-hidden border border-sand bg-sand-soft shrink-0">
+                                                    <img src="{{ $menu->image_url }}"
+                                                         alt="{{ $menu->name }}"
+                                                         loading="lazy"
+                                                         decoding="async"
+                                                         class="w-full h-full max-w-none object-cover">
+                                                </div>
                                             @else
                                                 <x-category-icon :slug="$category->slug" size="sm" />
                                             @endif
@@ -228,8 +221,8 @@
                 </div>
             </div>
 
-            {{-- Right 4 Columns: Live Ringkasan Pesanan Sticky Card (Matches PDF Page 7) --}}
-            <div class="xl:col-span-4 xl:sticky xl:top-6 bg-white rounded-2xl border border-sand p-6 space-y-5">
+            {{-- Right 4 Columns: Live Ringkasan Pesanan Sticky Card --}}
+            <div class="xl:col-span-4 xl:sticky xl:top-5 bg-white rounded-lg border border-sand p-5 space-y-4 shadow-2xs">
                 <div class="flex items-center justify-between">
                     <div>
                         <h3 class="text-lg font-bold text-teak">Ringkasan Pesanan</h3>

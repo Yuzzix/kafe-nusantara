@@ -42,12 +42,14 @@ class RestaurantPosFlowTest extends TestCase
         $this->get(route('categories.show', 'kopi'))
             ->assertOk()
             ->assertSee('Kopi Susu Gula Aren')
+            ->assertSee('images/menus/kopi-susu-gula-aren.webp')
             ->assertSee('Espresso');
 
         // Master + Filters: Daftar Menu
         $this->get(route('menus.index'))
             ->assertOk()
-            ->assertSee('Katalog cita rasa Nusantara');
+            ->assertSee('Daftar Menu')
+            ->assertSee('Nasi Goreng Spesial');
 
         $this->get(route('menus.create'))
             ->assertOk()
@@ -56,7 +58,8 @@ class RestaurantPosFlowTest extends TestCase
         // Master: Pesanan & Kasir + Detail Pesanan
         $this->get(route('orders.index'))
             ->assertOk()
-            ->assertSee('Pelayanan yang selalu terpantau');
+            ->assertSee('Pesanan & Kasir')
+            ->assertSee('Total Tagihan');
 
         $sampleOrder = Order::firstOrFail();
         $this->get(route('orders.show', $sampleOrder->order_number))
@@ -67,11 +70,25 @@ class RestaurantPosFlowTest extends TestCase
             ->assertOk()
             ->assertSee('Buat Pesanan Baru');
 
-        // Status Meja
+        // Status Meja & QR Stand Modal
         $this->get(route('tables.index'))
             ->assertOk()
             ->assertSee('Status Meja')
+            ->assertSee('Kartu Stand Meja')
             ->assertSee('VIP2');
+
+        // Layar Dapur (Kitchen Display System)
+        $this->get(route('kitchen.index'))
+            ->assertOk()
+            ->assertSee('Layar Dapur')
+            ->assertSee('Menunggu Antrean');
+
+        // Buku Menu Digital Tamu (with Table QR query parameter)
+        $this->get(route('menu-book', ['meja' => 'VIP1']))
+            ->assertOk()
+            ->assertSee('Buku Sajian Resmi')
+            ->assertSee('Meja VIP1')
+            ->assertSee('Nasi Goreng Spesial');
     }
 
     public function test_can_create_new_menu_with_category_relation_and_photo(): void
@@ -97,6 +114,8 @@ class RestaurantPosFlowTest extends TestCase
         $this->assertSame(34000, $menu->price);
         $this->assertTrue($menu->is_featured);
         $this->assertNotNull($menu->image);
+        $this->assertTrue($menu->hasStoredUpload());
+        $this->assertStringContainsString('/storage/menus/', (string) $menu->image_url);
         Storage::disk('public')->assertExists($menu->image);
     }
 

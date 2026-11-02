@@ -27,16 +27,23 @@ use Illuminate\Support\Facades\DB;
 class OrderSeeder extends Seeder
 {
     private const HISTORY_DAYS = 30;
+
     private const HISTORY_ORDERS = 90;
 
     private const DRINK_CATEGORIES = ['kopi', 'non-kopi', 'teh-minuman-segar'];
+
     private const DRINK_NOTES = ['Less sugar', 'Less ice', 'Tanpa gula', 'Extra shot', 'Panas', 'Gula dipisah'];
+
     private const FOOD_NOTES = ['Tidak pedas', 'Extra pedas', 'Tanpa bawang', 'Sambal dipisah', 'Porsi kecil untuk anak'];
+
     private const ORDER_NOTES = ['Tolong disajikan bersamaan', 'Ulang tahun, minta lilin ya', 'Alergi kacang', 'Minta sendok tambahan'];
 
     private Collection $allMenus;
+
     private Collection $availableMenus;
+
     private Collection $staffIds;
+
     private Collection $tables;
 
     public function run(): void
@@ -160,7 +167,7 @@ class OrderSeeder extends Seeder
 
         // ----- Order -----
         // forceFill so we can set created_at/updated_at to the past.
-        $order = new Order();
+        $order = new Order;
         $order->forceFill([
             'order_number' => Order::generateOrderNumber($time),
             'user_id' => $this->staffIds->random(),
@@ -221,7 +228,7 @@ class OrderSeeder extends Seeder
             $reference = $prefix.'-'.$paidAt->format('ymd').'-'.fake()->numerify('######');
         }
 
-        $payment = new Payment();
+        $payment = new Payment;
         $payment->forceFill([
             'order_id' => $order->id,
             'method' => $method,

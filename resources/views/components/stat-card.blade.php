@@ -6,27 +6,35 @@
 ])
 
 @php
-    $accentStyles = match ($tone) {
-        'sage' => 'bg-sage-tint text-sage',
-        'clay' => 'bg-clay-tint text-clay',
-        'saffron' => 'bg-saffron-tint text-saffron',
-        'brass' => 'bg-brass-tint text-[#8C6538]',
-        default => 'bg-copper-tint text-copper',
+    $borderAccent = match ($tone) {
+        'sage' => 'border-l-sage',
+        'clay' => 'border-l-clay',
+        'saffron' => 'border-l-saffron',
+        'brass' => 'border-l-brass',
+        default => 'border-l-copper',
+    };
+    $iconTint = match ($tone) {
+        'sage' => 'text-sage',
+        'clay' => 'text-clay',
+        'saffron' => 'text-saffron',
+        'brass' => 'text-[#8C6538]',
+        default => 'text-copper',
     };
 @endphp
 
-<div {{ $attributes->merge(['class' => 'kn-card-lift bg-white rounded-2xl border border-sand p-5 flex items-center gap-4']) }}>
-    @isset($icon)
-        <div class="w-12 h-12 rounded-xl {{ $accentStyles }} flex items-center justify-center shrink-0">
-            {{ $icon }}
-        </div>
-    @endisset
-
-    <div class="min-w-0">
-        <p class="text-xs font-medium text-taupe">{{ $label }}</p>
-        <p class="text-xl lg:text-2xl font-bold text-teak tabular-nums mt-0.5 truncate">{{ $value }}</p>
-        @if ($hint)
-            <p class="text-xs text-taupe mt-1">{{ $hint }}</p>
-        @endif
+<div {{ $attributes->merge(['class' => "bg-white rounded-lg border border-sand border-l-[3px] {$borderAccent} p-4 flex flex-col justify-between shadow-2xs"]) }}>
+    <div class="flex items-start justify-between gap-2">
+        <p class="text-[11px] font-bold uppercase tracking-wider text-taupe">{{ $label }}</p>
+        @isset($icon)
+            <div class="w-4 h-4 {{ $iconTint }} opacity-80 shrink-0 [&>svg]:w-4 [&>svg]:h-4">
+                {{ $icon }}
+            </div>
+        @endisset
     </div>
+
+    <p class="text-xl lg:text-2xl font-bold text-teak tabular-nums mt-2 truncate">{{ $value }}</p>
+
+    @if ($hint)
+        <p class="text-[11.5px] text-taupe mt-1.5 pt-1.5 border-t border-sand/60 truncate">{{ $hint }}</p>
+    @endif
 </div>

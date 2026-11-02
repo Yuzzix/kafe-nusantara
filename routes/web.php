@@ -3,6 +3,8 @@
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DiningTableController;
+use App\Http\Controllers\GuestMenuController;
+use App\Http\Controllers\KitchenController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\OrderController;
 use Illuminate\Support\Facades\Route;
@@ -11,6 +13,12 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 Route::get('/search', [DashboardController::class, 'search'])->name('workspace.search');
 Route::post('/staff/switch', [DashboardController::class, 'switchStaff'])->name('staff.switch');
+
+// Buku Menu Digital Tamu (Customer-facing Read-Only Menu Book & QR Table Preview)
+Route::get('/buku-menu', [GuestMenuController::class, 'index'])->name('menu-book');
+
+// Layar Dapur / Kitchen Display System (KDS)
+Route::get('/dapur', [KitchenController::class, 'index'])->name('kitchen.index');
 
 // Kategori Menu (Master-Detail: Category -> Menus)
 Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');

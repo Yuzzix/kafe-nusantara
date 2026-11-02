@@ -71,4 +71,36 @@ class Menu extends Model
     {
         return config('restaurant.currency_prefix', 'Rp ').number_format($this->price, 0, ',', '.');
     }
+
+    /**
+     * Resolves a menu image whether it comes from:
+     * - External URL (https://...)
+     * - Bundled public catalog asset (images/menus/*.webp)
+     * - Staff form upload on the public storage disk (menus/*)
+     */
+    public function getImageUrlAttribute(): ?string
+    {
+        if (! $this->image) {
+            return null;
+        }
+
+        if (str_starts_with($this->image, 'http://') || str_starts_with($this->image, 'https://')) {
+            return $this->image;
+        }
+
+        if (str_starts_with($this->image, 'images/')) {
+            return asset($this->image);
+        }
+
+        return asset('storage/'.ltrim($this->image, '/'));
+    }
+
+    /** True only when $this->image points to an uploaded file on Storage::disk('public'). */
+    public function hasStoredUpload(): bool
+    {
+        return (bool) $this->image
+            && ! str_starts_with($this->image, 'http://')
+            && ! str_starts_with($this->image, 'https://')
+            && ! str_starts_with($this->image, 'images/');
+    }
 }

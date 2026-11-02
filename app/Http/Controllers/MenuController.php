@@ -146,11 +146,13 @@ class MenuController extends Controller
 
         $imagePath = $menu->image;
         if ($request->boolean('remove_image') && $imagePath) {
-            Storage::disk('public')->delete($imagePath);
+            if ($menu->hasStoredUpload()) {
+                Storage::disk('public')->delete($imagePath);
+            }
             $imagePath = null;
         }
         if ($request->hasFile('image')) {
-            if ($imagePath) {
+            if ($imagePath && $menu->hasStoredUpload()) {
                 Storage::disk('public')->delete($imagePath);
             }
             $imagePath = $request->file('image')->store('menus', 'public');

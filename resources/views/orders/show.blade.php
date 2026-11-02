@@ -2,15 +2,15 @@
 
 @section('title', 'Detail Pesanan '.$order->order_number)
 @section('breadcrumb')
-    <a href="{{ route('orders.index') }}" class="hover:text-copper">Ruang kerja / Pesanan & Kasir</a> / {{ $order->order_number }}
+    <a href="{{ route('orders.index') }}" class="hover:text-copper">Beranda / Pesanan & Kasir</a> / {{ $order->order_number }}
 @endsection
-@section('page_title', 'Detail Pesanan')
+@section('page_title', 'Rincian Pesanan')
 
 @section('header_actions')
     <button type="button"
-            onclick="window.print()"
-            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-copper hover:bg-copper-dark text-white text-sm font-semibold shadow-sm transition cursor-pointer">
-        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            onclick="document.getElementById('receipt-preview-modal')?.classList.remove('hidden')"
+            class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-copper hover:bg-copper-dark text-white text-xs font-semibold shadow-2xs transition cursor-pointer">
+        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/>
         </svg>
         <span>Cetak Struk</span>
@@ -32,7 +32,7 @@
     @endphp
 
     {{-- Top Order Header Row (Matches PDF Page 6) --}}
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+    <div class="kn-screen-only flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div>
             <h2 class="text-2xl font-bold text-teak tabular-nums">{{ $order->order_number }}</h2>
             <p class="text-xs text-taupe mt-1">
@@ -49,7 +49,7 @@
 
     {{-- Kitchen Workflow Action Strip (When Unpaid & Not Cancelled — solves the static-badge gap!) --}}
     @if (! $order->isPaid() && $order->status !== 'cancelled')
-        <div class="no-print mb-6 bg-white rounded-2xl border border-sand px-5 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div class="no-print mb-5 bg-white rounded-lg border border-sand px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
             <div class="flex items-center gap-2.5 text-xs">
                 <span class="font-bold text-teak">Alur Dapur & Sajian:</span>
                 <span class="text-taupe">Perbarui progres sebelum atau sesudah hidangan diantar ke meja pelanggan.</span>
@@ -92,10 +92,10 @@
         </div>
     @endif
 
-    {{-- Main 2-Column Layout: Left Itemized Bill + Right Payment Panel (Matches PDF Page 6) --}}
-    <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
+    {{-- Main 2-Column Layout: Left Itemized Bill + Right Payment Panel --}}
+    <div class="kn-screen-only grid grid-cols-1 xl:grid-cols-12 gap-5 items-start">
         {{-- Left 7 Columns: Itemized Order Details --}}
-        <div class="xl:col-span-7 bg-white rounded-2xl border border-sand p-6 sm:p-8">
+        <div class="xl:col-span-7 bg-white rounded-lg border border-sand p-6 shadow-2xs">
             {{-- Customer & Table Header --}}
             <div class="flex flex-wrap items-center justify-between gap-4 pb-5 border-b border-sand">
                 <div class="flex items-center gap-3.5">
@@ -196,8 +196,8 @@
             </div>
         </div>
 
-        {{-- Right 5 Columns: Pembayaran Panel (Matches PDF Page 6) --}}
-        <div class="xl:col-span-5 bg-white rounded-2xl border border-sand p-6 sm:p-7">
+        {{-- Right 5 Columns: Pembayaran Panel --}}
+        <div class="xl:col-span-5 bg-white rounded-lg border border-sand p-6 shadow-2xs">
             <div class="flex items-center justify-between mb-5">
                 <h3 class="text-lg font-bold text-teak">Pembayaran</h3>
                 <svg class="w-5 h-5 text-copper" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
@@ -328,6 +328,25 @@
                         </div>
                     </div>
 
+                    {{-- Dynamic QRIS Scan Card (Shown when QRIS is selected) --}}
+                    <div id="qris-payment-box" class="hidden rounded-lg kn-batik-banner border border-brass/40 p-4 text-center space-y-3 text-alabaster">
+                        <div class="flex items-center justify-between text-[10.5px] font-bold tracking-wider uppercase px-1">
+                            <span class="text-brass">QRIS · Standar Pembayaran Nasional</span>
+                            <span class="px-2 py-0.5 rounded bg-brass/15 border border-brass/35 text-brass text-[10px]">GPN</span>
+                        </div>
+
+                        <div class="bg-white rounded-lg border border-brass/30 p-3.5 inline-block shadow-sm">
+                            <p class="font-serif text-sm font-bold text-teak">Kafe Nusantara</p>
+                            <p class="text-[10px] text-taupe mb-2.5 tabular-nums">NMID: ID1026049281740 · {{ $order->order_number }}</p>
+                            <x-qr-matrix :payload="'QRIS.KAFENUSANTARA.'.$order->order_number.'.'.$order->total" :size="168" />
+                        </div>
+
+                        <div class="flex items-center justify-center gap-2 text-xs font-semibold text-emerald-300">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 kn-pulse-dot"></span>
+                            <span>Siap dipindai pelanggan · {{ $order->formatted_total }}</span>
+                        </div>
+                    </div>
+
                     {{-- Non-Cash Section: Reference Number --}}
                     <div id="noncash-payment-fields" class="hidden space-y-2">
                         <label for="reference_number" class="block text-xs font-bold text-teak">
@@ -358,6 +377,180 @@
             @endif
         </div>
     </div>
+
+    {{-- Reusable 80mm Receipt Markup (Used in On-Screen Preview Modal AND @media print) --}}
+    @php
+        $latestPayment = $order->payments->last();
+    @endphp
+
+    {{-- Print-Only 80mm Boutique Thermal Receipt --}}
+    <div id="thermal-receipt-print" class="hidden kn-print-only mx-auto w-[310px] py-4 text-teak font-sans text-xs">
+        <div class="text-center pb-3 border-b border-dashed border-teak/40">
+            <p class="font-serif text-xl font-bold tracking-tight">Kafe Nusantara</p>
+            <p class="text-[11px] text-taupe mt-0.5">Jl. Nusantara Raya No. 18, Jakarta</p>
+            <p class="text-[10.5px] text-taupe">Telp (021) 555-0194 · NPWP 01.884.291.4-011</p>
+        </div>
+
+        <div class="py-2.5 border-b border-dashed border-teak/40 space-y-1 text-[11px]">
+            <div class="flex justify-between"><span>No. Order</span><span class="font-bold tabular-nums">{{ $order->order_number }}</span></div>
+            <div class="flex justify-between"><span>Waktu</span><span class="tabular-nums">{{ $order->created_at->format('d/m/Y H:i') }} WIB</span></div>
+            <div class="flex justify-between"><span>Kasir</span><span>{{ $order->user?->name ?: 'Staf Gerai' }}</span></div>
+            <div class="flex justify-between"><span>Pelanggan</span><span>{{ $customerDisplay }}</span></div>
+            <div class="flex justify-between">
+                <span>Layanan</span>
+                <span class="font-semibold">{{ $order->type_label }}{{ $order->diningTable ? ' · Meja '.$order->diningTable->number : '' }}</span>
+            </div>
+        </div>
+
+        <div class="py-2.5 border-b border-dashed border-teak/40 space-y-2">
+            @foreach ($order->items as $item)
+                <div>
+                    <div class="flex justify-between font-semibold">
+                        <span>{{ $item->menu?->name ?? 'Menu Terarsip' }}</span>
+                        <span class="tabular-nums">{{ $item->formatted_subtotal }}</span>
+                    </div>
+                    <p class="text-[10.5px] text-taupe tabular-nums">
+                        {{ $item->quantity }} × Rp {{ number_format($item->unit_price, 0, ',', '.') }}
+                        @if ($item->notes)
+                            · <em>({{ $item->notes }})</em>
+                        @endif
+                    </p>
+                </div>
+            @endforeach
+        </div>
+
+        <div class="py-2.5 border-b border-dashed border-teak/40 space-y-1 text-[11px] tabular-nums">
+            <div class="flex justify-between"><span>Subtotal</span><span>Rp {{ number_format($order->subtotal, 0, ',', '.') }}</span></div>
+            @if ($order->discount > 0)
+                <div class="flex justify-between"><span>Diskon</span><span>- Rp {{ number_format($order->discount, 0, ',', '.') }}</span></div>
+            @endif
+            <div class="flex justify-between"><span>Biaya Layanan (5%)</span><span>Rp {{ number_format($order->service_charge, 0, ',', '.') }}</span></div>
+            <div class="flex justify-between"><span>Pajak PB1 (10%)</span><span>Rp {{ number_format($order->tax, 0, ',', '.') }}</span></div>
+            <div class="flex justify-between text-sm font-bold pt-1.5 border-t border-teak/20">
+                <span>TOTAL</span><span>{{ $order->formatted_total }}</span>
+            </div>
+        </div>
+
+        <div class="py-2.5 border-b border-dashed border-teak/40 space-y-1 text-[11px] tabular-nums">
+            @if ($order->isPaid() && $latestPayment)
+                <div class="flex justify-between"><span>Metode Bayar</span><span class="font-bold uppercase">{{ $latestPayment->method_label }}</span></div>
+                @if ($latestPayment->method === 'cash')
+                    <div class="flex justify-between"><span>Tunai Diterima</span><span>Rp {{ number_format((int) $latestPayment->received_amount, 0, ',', '.') }}</span></div>
+                    <div class="flex justify-between font-bold"><span>Kembalian</span><span>Rp {{ number_format($latestPayment->change_amount, 0, ',', '.') }}</span></div>
+                @elseif ($latestPayment->reference_number)
+                    <div class="flex justify-between"><span>Ref</span><span class="font-mono">{{ $latestPayment->reference_number }}</span></div>
+                @endif
+            @else
+                <p class="text-center font-bold uppercase tracking-wider py-0.5">Tagihan Sementara · Belum Lunas</p>
+            @endif
+        </div>
+
+        <div class="pt-3 text-center space-y-2">
+            <x-qr-matrix :payload="'STRUK:'.$order->order_number" :size="76" />
+            <p class="font-serif italic text-xs">Terima kasih telah singgah di Kafe Nusantara.</p>
+            <p class="text-[10px] text-taupe">Cita rasa lokal · Layanan sepenuh hati</p>
+        </div>
+    </div>
+
+    {{-- Interactive On-Screen 80mm Receipt Preview Modal --}}
+    <div id="receipt-preview-modal"
+         onclick="if (event.target === this) this.classList.add('hidden')"
+         class="no-print hidden fixed inset-0 z-50 bg-teak/55 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+        <div class="w-full max-w-sm rounded-2xl bg-alabaster border border-sand shadow-2xl p-5 kn-enter">
+            <div class="flex items-center justify-between mb-3">
+                <span class="text-xs font-bold uppercase tracking-wider text-copper">Pratinjau Struk Kasir (80mm)</span>
+                <button type="button"
+                        onclick="document.getElementById('receipt-preview-modal').classList.add('hidden')"
+                        class="w-7 h-7 rounded-lg bg-white border border-sand text-taupe hover:text-teak text-xs font-bold cursor-pointer">
+                    ✕
+                </button>
+            </div>
+
+            {{-- Boutique Paper Ticket Card --}}
+            <div class="bg-white rounded-xl border border-sand shadow-sm px-5 py-5 text-xs text-teak max-h-[68vh] overflow-y-auto">
+                <div class="text-center pb-3 border-b border-dashed border-sand">
+                    <p class="font-serif text-xl font-bold text-teak">Kafe Nusantara</p>
+                    <p class="text-[11px] text-taupe mt-0.5">Jl. Nusantara Raya No. 18, Jakarta</p>
+                    <p class="text-[10.5px] text-taupe">Telp (021) 555-0194</p>
+                </div>
+
+                <div class="py-3 border-b border-dashed border-sand space-y-1 text-[11px]">
+                    <div class="flex justify-between"><span class="text-taupe">No. Order</span><span class="font-bold tabular-nums">{{ $order->order_number }}</span></div>
+                    <div class="flex justify-between"><span class="text-taupe">Waktu</span><span class="tabular-nums">{{ $order->created_at->format('d/m/Y H:i') }} WIB</span></div>
+                    <div class="flex justify-between"><span class="text-taupe">Kasir</span><span>{{ $order->user?->name ?: 'Staf Gerai' }}</span></div>
+                    <div class="flex justify-between"><span class="text-taupe">Pelanggan</span><span class="font-semibold">{{ $customerDisplay }}</span></div>
+                    <div class="flex justify-between">
+                        <span class="text-taupe">Layanan</span>
+                        <span class="font-semibold">{{ $order->type_label }}{{ $order->diningTable ? ' · Meja '.$order->diningTable->number : '' }}</span>
+                    </div>
+                </div>
+
+                <div class="py-3 border-b border-dashed border-sand space-y-2">
+                    @foreach ($order->items as $item)
+                        <div>
+                            <div class="flex justify-between font-semibold">
+                                <span>{{ $item->menu?->name ?? 'Menu Terarsip' }}</span>
+                                <span class="tabular-nums">{{ $item->formatted_subtotal }}</span>
+                            </div>
+                            <p class="text-[10.5px] text-taupe tabular-nums">
+                                {{ $item->quantity }} × Rp {{ number_format($item->unit_price, 0, ',', '.') }}
+                                @if ($item->notes)
+                                    <span class="text-copper">· {{ $item->notes }}</span>
+                                @endif
+                            </p>
+                        </div>
+                    @endforeach
+                </div>
+
+                <div class="py-3 border-b border-dashed border-sand space-y-1 text-[11px] tabular-nums">
+                    <div class="flex justify-between"><span class="text-taupe">Subtotal</span><span>Rp {{ number_format($order->subtotal, 0, ',', '.') }}</span></div>
+                    @if ($order->discount > 0)
+                        <div class="flex justify-between text-copper"><span>Diskon</span><span>- Rp {{ number_format($order->discount, 0, ',', '.') }}</span></div>
+                    @endif
+                    <div class="flex justify-between"><span class="text-taupe">Biaya Layanan (5%)</span><span>Rp {{ number_format($order->service_charge, 0, ',', '.') }}</span></div>
+                    <div class="flex justify-between"><span class="text-taupe">Pajak PB1 (10%)</span><span>Rp {{ number_format($order->tax, 0, ',', '.') }}</span></div>
+                    <div class="flex justify-between text-sm font-bold text-copper pt-2 border-t border-sand">
+                        <span class="text-teak">TOTAL</span><span>{{ $order->formatted_total }}</span>
+                    </div>
+                </div>
+
+                <div class="py-2.5 border-b border-dashed border-sand space-y-1 text-[11px] tabular-nums">
+                    @if ($order->isPaid() && $latestPayment)
+                        <div class="flex justify-between"><span class="text-taupe">Pembayaran</span><span class="font-bold text-sage uppercase">{{ $latestPayment->method_label }} · LUNAS</span></div>
+                        @if ($latestPayment->method === 'cash')
+                            <div class="flex justify-between"><span class="text-taupe">Diterima</span><span>Rp {{ number_format((int) $latestPayment->received_amount, 0, ',', '.') }}</span></div>
+                            <div class="flex justify-between font-bold text-sage"><span>Kembalian</span><span>Rp {{ number_format($latestPayment->change_amount, 0, ',', '.') }}</span></div>
+                        @elseif ($latestPayment->reference_number)
+                            <div class="flex justify-between"><span class="text-taupe">No. Ref</span><span class="font-mono">{{ $latestPayment->reference_number }}</span></div>
+                        @endif
+                    @else
+                        <p class="text-center font-bold text-saffron uppercase tracking-wider py-0.5">Tagihan Sementara · Belum Dibayar</p>
+                    @endif
+                </div>
+
+                <div class="pt-3 text-center space-y-1.5">
+                    <x-qr-matrix :payload="'STRUK:'.$order->order_number" :size="76" />
+                    <p class="font-serif italic text-xs text-teak">Terima kasih telah singgah di Kafe Nusantara.</p>
+                </div>
+            </div>
+
+            <div class="mt-4 flex items-center gap-2.5">
+                <button type="button"
+                        onclick="document.getElementById('receipt-preview-modal').classList.add('hidden')"
+                        class="px-4 py-2.5 rounded-xl bg-white border border-sand text-xs font-semibold text-teak hover:bg-sand-soft cursor-pointer">
+                    Tutup
+                </button>
+                <button type="button"
+                        onclick="window.print()"
+                        class="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-copper hover:bg-copper-dark text-white text-xs font-bold shadow-sm cursor-pointer">
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/>
+                    </svg>
+                    <span>Cetak ke Printer</span>
+                </button>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @if (! $order->isPaid() && $order->status !== 'cancelled')
@@ -370,6 +563,7 @@
         const cardSubtypeBox = document.getElementById('card-subtype-box');
         const cardTypePills = document.querySelectorAll('.card-type-pill');
         const cashFields = document.getElementById('cash-payment-fields');
+        const qrisBox = document.getElementById('qris-payment-box');
         const nonCashFields = document.getElementById('noncash-payment-fields');
         const receivedInput = document.getElementById('received_amount');
         const changeDisplay = document.getElementById('change-amount-display');
@@ -420,6 +614,7 @@
 
             cardSubtypeBox.classList.toggle('hidden', !isCard);
             cashFields.classList.toggle('hidden', !isCash);
+            qrisBox?.classList.toggle('hidden', method !== 'qris');
             nonCashFields.classList.toggle('hidden', isCash);
             receivedInput.required = isCash;
 

@@ -74,14 +74,16 @@ class MenuSeeder extends Seeder
         foreach (self::MENUS as $categorySlug => $menus) {
             foreach ($menus as $menu) {
                 [$name, $price, $description] = $menu;
+                $slug = Str::slug($name);
+                $bundledImage = "images/menus/{$slug}.webp";
 
                 Menu::create([
                     'category_id' => $categoryIds[$categorySlug],
                     'name' => $name,
-                    'slug' => Str::slug($name),
+                    'slug' => $slug,
                     'description' => $description,
                     'price' => $price,
-                    'image' => null, // UI can show a placeholder until real photos are uploaded
+                    'image' => file_exists(public_path($bundledImage)) ? $bundledImage : null,
                     'is_featured' => $menu[3] ?? false,
                     'is_available' => $menu[4] ?? true,
                 ]);

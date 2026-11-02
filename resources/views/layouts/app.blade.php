@@ -64,7 +64,9 @@
             .kn-bar-grow { transform-origin: bottom; animation: knGrowBar 560ms cubic-bezier(0.22, 1, 0.36, 1) both; }
             .kn-pulse-dot { animation: knPulseSoft 2s ease-in-out infinite; }
             .kn-spinner { animation: knSpin 680ms linear infinite; }
-            @media print { .no-print { display: none !important; } body { background: #fff !important; } }
+            .kn-batik-sidebar, .kn-batik-banner { background-color: #191614; }
+            .kn-batik-card-light { background-color: #FFFFFF; }
+            @media print { .no-print, .kn-screen-only { display: none !important; } .kn-print-only { display: block !important; } body { background: #fff !important; } }
         </style>
     @endif
 </head>
@@ -79,17 +81,18 @@
             @include('partials.topbar')
 
             {{-- Flash Notifications & Validation Summary --}}
-            <div class="px-6 lg:px-10 pt-5 no-print">
+            <div class="px-6 lg:px-8 pt-4 no-print">
                 @include('partials.flash')
             </div>
 
             {{-- Main Page Content --}}
-            <main data-vt="main" class="kn-enter flex-1 px-6 lg:px-10 py-6 lg:py-8">
+            <main data-vt="main" class="kn-enter flex-1 px-6 lg:px-8 py-5 lg:py-6">
                 @yield('content')
             </main>
         </div>
     </div>
 
+    @include('partials.command-palette')
     @include('partials.motion')
     @stack('scripts')
 </body>
