@@ -14,6 +14,11 @@
     </a>
 @endsection
 
+@php
+    $canOpenOrderDetail = ! isset($activeStaff) || ! $activeStaff || $activeStaff->canAccessOrders();
+    $canProcessPayment = ! isset($activeStaff) || ! $activeStaff || $activeStaff->canProcessPayment();
+@endphp
+
 @section('content')
     {{-- Top 3 Queue Summary Cards --}}
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5">
@@ -49,9 +54,13 @@
                 <div class="bg-white rounded-lg border border-sand border-t-[3px] border-t-saffron p-4 space-y-3 shadow-2xs">
                     <div class="flex items-start justify-between gap-2 pb-2.5 border-b border-dashed border-sand">
                         <div>
-                            <a href="{{ route('orders.show', $order->order_number) }}" class="text-sm font-bold text-teak hover:text-copper tabular-nums">
-                                {{ $order->order_number }}
-                            </a>
+                            @if ($canOpenOrderDetail)
+                                <a href="{{ route('orders.show', $order->order_number) }}" class="text-sm font-bold text-teak hover:text-copper tabular-nums">
+                                    {{ $order->order_number }}
+                                </a>
+                            @else
+                                <span class="text-sm font-bold text-teak tabular-nums">{{ $order->order_number }}</span>
+                            @endif
                             <p class="text-[11px] text-taupe mt-0.5">
                                 {{ $order->customer_name ?: 'Tanpa nama' }} · {{ $order->created_at->format('H:i') }} WIB
                             </p>
@@ -118,9 +127,13 @@
                 <div class="bg-white rounded-lg border border-sand border-t-[3px] border-t-copper p-4 space-y-3 shadow-2xs">
                     <div class="flex items-start justify-between gap-2 pb-2.5 border-b border-dashed border-sand">
                         <div>
-                            <a href="{{ route('orders.show', $order->order_number) }}" class="text-sm font-bold text-teak hover:text-copper tabular-nums">
-                                {{ $order->order_number }}
-                            </a>
+                            @if ($canOpenOrderDetail)
+                                <a href="{{ route('orders.show', $order->order_number) }}" class="text-sm font-bold text-teak hover:text-copper tabular-nums">
+                                    {{ $order->order_number }}
+                                </a>
+                            @else
+                                <span class="text-sm font-bold text-teak tabular-nums">{{ $order->order_number }}</span>
+                            @endif
                             <p class="text-[11px] text-taupe mt-0.5">
                                 {{ $order->customer_name ?: 'Tanpa nama' }} · {{ $order->created_at->format('H:i') }} WIB
                             </p>
@@ -187,9 +200,13 @@
                 <div class="bg-white rounded-lg border border-sand border-t-[3px] border-t-sage p-4 space-y-2.5 shadow-2xs">
                     <div class="flex items-start justify-between gap-2 pb-2 border-b border-sand/60">
                         <div>
-                            <a href="{{ route('orders.show', $order->order_number) }}" class="text-sm font-bold text-teak hover:text-copper tabular-nums">
-                                {{ $order->order_number }}
-                            </a>
+                            @if ($canOpenOrderDetail)
+                                <a href="{{ route('orders.show', $order->order_number) }}" class="text-sm font-bold text-teak hover:text-copper tabular-nums">
+                                    {{ $order->order_number }}
+                                </a>
+                            @else
+                                <span class="text-sm font-bold text-teak tabular-nums">{{ $order->order_number }}</span>
+                            @endif
                             <p class="text-[11px] text-taupe mt-0.5">
                                 {{ $order->customer_name ?: 'Tanpa nama' }} · {{ $order->items->sum('quantity') }} porsi
                             </p>
@@ -208,10 +225,14 @@
 
                     <div class="flex items-center justify-between text-xs">
                         <span class="font-bold text-teak tabular-nums">{{ $order->formatted_total }}</span>
-                        <a href="{{ route('orders.show', $order->order_number) }}"
-                           class="font-bold text-copper hover:underline">
-                            Proses Kasir →
-                        </a>
+                        @if ($canProcessPayment)
+                            <a href="{{ route('orders.show', $order->order_number) }}"
+                               class="font-bold text-copper hover:underline">
+                                Proses Kasir →
+                            </a>
+                        @else
+                            <span class="text-sage font-semibold">Menunggu Kasir</span>
+                        @endif
                     </div>
                 </div>
             @empty

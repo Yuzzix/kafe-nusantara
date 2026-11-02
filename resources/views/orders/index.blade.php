@@ -1,17 +1,23 @@
 @extends('layouts.app')
 
-@section('title', 'Pesanan & Kasir')
-@section('breadcrumb', 'Beranda / Operasional / Pesanan & Kasir')
-@section('page_title', 'Pesanan & Kasir')
+@php
+    $canProcessPayment = ! isset($activeStaff) || ! $activeStaff || $activeStaff->canProcessPayment();
+@endphp
+
+@section('title', $canProcessPayment ? 'Pesanan & Kasir' : 'Pesanan Pelanggan')
+@section('breadcrumb', $canProcessPayment ? 'Beranda / Operasional / Pesanan & Kasir' : 'Beranda / Operasional / Pesanan Pelanggan')
+@section('page_title', $canProcessPayment ? 'Pesanan & Kasir' : 'Pesanan Pelanggan')
 
 @section('header_actions')
-    <a href="{{ route('orders.export', request()->query()) }}"
-       class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-sand bg-white text-xs font-semibold text-teak hover:border-copper transition">
-        <svg class="w-3.5 h-3.5 text-taupe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>
-        </svg>
-        <span>Ekspor CSV</span>
-    </a>
+    @if ($canProcessPayment)
+        <a href="{{ route('orders.export', request()->query()) }}"
+           class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-sand bg-white text-xs font-semibold text-teak hover:border-copper transition">
+            <svg class="w-3.5 h-3.5 text-taupe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+            </svg>
+            <span>Ekspor CSV</span>
+        </a>
+    @endif
     <a href="{{ route('orders.create') }}"
        class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-copper hover:bg-copper-dark text-white text-xs font-semibold shadow-2xs transition">
         <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">

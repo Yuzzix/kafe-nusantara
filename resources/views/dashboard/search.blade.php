@@ -18,6 +18,7 @@
     @if ($q !== '')
         <div class="space-y-7">
             {{-- Orders --}}
+            @if (! isset($activeStaff) || ! $activeStaff || $activeStaff->canAccessOrders())
             <div>
                 <h2 class="text-sm font-bold text-teak uppercase tracking-wider mb-2.5">Pesanan ({{ $orders->count() }})</h2>
                 @if ($orders->isEmpty())
@@ -39,6 +40,7 @@
                     </div>
                 @endif
             </div>
+            @endif
 
             {{-- Menus --}}
             <div>
@@ -55,6 +57,7 @@
             </div>
 
             {{-- Categories --}}
+            @if (! isset($activeStaff) || ! $activeStaff || $activeStaff->canManageCatalog())
             <div>
                 <h2 class="text-sm font-bold text-teak uppercase tracking-wider mb-2.5">Kategori ({{ $categories->count() }})</h2>
                 @if ($categories->isEmpty())
@@ -67,6 +70,7 @@
                     </div>
                 @endif
             </div>
+            @endif
         </div>
     @endif
 @endsection

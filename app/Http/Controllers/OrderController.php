@@ -273,6 +273,11 @@ class OrderController extends Controller
             return back()->with('error', 'Pesanan ini sudah dibatalkan sebelumnya.');
         }
 
+        $staff = User::currentShiftStaff();
+        if ($staff?->role === User::ROLE_KITCHEN && $validated['status'] === Order::STATUS_CANCELLED) {
+            return back()->with('error', ' Pembatalan pesanan hanya dapat dilakukan oleh Pelayan, Kasir, atau Admin.');
+        }
+
         DB::transaction(function () use ($order, $validated): void {
             $order->update([
                 'status' => $validated['status'],

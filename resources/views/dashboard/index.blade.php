@@ -1,8 +1,12 @@
 @extends('layouts.app')
 
-@section('title', 'Ringkasan Gerai')
+@php
+    $showManagerAnalytics = ! isset($activeStaff) || ! $activeStaff || $activeStaff->canViewManagerAnalytics();
+@endphp
+
+@section('title', $showManagerAnalytics ? 'Ringkasan Gerai' : 'Ringkasan Shift Kasir')
 @section('breadcrumb', 'Beranda / Ringkasan Operasional')
-@section('page_title', 'Ringkasan Gerai')
+@section('page_title', $showManagerAnalytics ? 'Ringkasan Gerai' : 'Ringkasan Shift Kasir')
 
 @section('header_actions')
     <a href="{{ route('orders.create') }}"
@@ -26,8 +30,8 @@
         </div>
     </div>
 
-    {{-- Top 4 Ledger KPI Cards --}}
-    <div class="kn-stagger grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
+    {{-- Top Ledger KPI Cards (4 for Admin, 3 daily shift cards for Kasir) --}}
+    <div class="kn-stagger grid grid-cols-1 sm:grid-cols-2 {{ $showManagerAnalytics ? 'xl:grid-cols-4' : 'xl:grid-cols-3' }} gap-4 mb-6">
         <x-stat-card
             label="Pendapatan Hari Ini"
             :value="'Rp '.number_format($todayRevenue, 0, ',', '.')"
@@ -40,17 +44,19 @@
             </x-slot:icon>
         </x-stat-card>
 
-        <x-stat-card
-            label="Pendapatan 30 Hari"
-            :value="'Rp '.number_format($monthRevenue, 0, ',', '.')"
-            :hint="$monthOrdersCount.' transaksi selesai'"
-            tone="brass">
-            <x-slot:icon>
-                <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                    <path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/>
-                </svg>
-            </x-slot:icon>
-        </x-stat-card>
+        @if ($showManagerAnalytics)
+            <x-stat-card
+                label="Pendapatan 30 Hari"
+                :value="'Rp '.number_format($monthRevenue, 0, ',', '.')"
+                :hint="$monthOrdersCount.' transaksi selesai'"
+                tone="brass">
+                <x-slot:icon>
+                    <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/>
+                    </svg>
+                </x-slot:icon>
+            </x-stat-card>
+        @endif
 
         <x-stat-card
             label="Pesanan Sedang Berjalan"
@@ -78,7 +84,8 @@
         </x-stat-card>
     </div>
 
-    {{-- Middle Grid: 7-Day Revenue Bar Chart + Top 5 Best-Selling Menus --}}
+    {{-- Middle Grid: 7-Day Revenue Bar Chart (Admin only) + Top 5 Best-Selling Menus --}}
+    @if ($showManagerAnalytics)
     <div class="grid grid-cols-1 xl:grid-cols-3 gap-5 mb-6">
         {{-- 7-Day Revenue Trend --}}
         <div class="xl:col-span-2 bg-white rounded-lg border border-sand p-5 flex flex-col justify-between shadow-2xs">
@@ -158,6 +165,7 @@
             </div>
         </div>
     </div>
+    @endif
 
     {{-- Live Active Orders Queue --}}
     <div class="bg-white rounded-lg border border-sand overflow-hidden shadow-2xs">
@@ -167,9 +175,11 @@
                 <p class="text-xs text-taupe mt-0.5">Pesanan yang sedang diproses dapur atau menunggu penyelesaian kasir.</p>
             </div>
             <div class="flex items-center gap-4">
-                <a href="{{ route('kitchen.index') }}" class="text-xs font-semibold text-taupe hover:text-copper">
-                    Layar Dapur
-                </a>
+                @if (! isset($activeStaff) || ! $activeStaff || $activeStaff->canViewKitchen())
+                    <a href="{{ route('kitchen.index') }}" class="text-xs font-semibold text-taupe hover:text-copper">
+                        Layar Dapur
+                    </a>
+                @endif
                 <a href="{{ route('tables.index') }}" class="text-xs font-semibold text-taupe hover:text-teak">
                     Status Meja
                 </a>

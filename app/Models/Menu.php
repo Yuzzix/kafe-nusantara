@@ -80,19 +80,29 @@ class Menu extends Model
      */
     public function getImageUrlAttribute(): ?string
     {
-        if (! $this->image) {
+        $imagePath = $this->image;
+
+        // Auto-fallback for teammates/databases seeded before bundled .webp photos were added
+        if (! $imagePath && $this->slug) {
+            $bundled = "images/menus/{$this->slug}.webp";
+            if (file_exists(public_path($bundled))) {
+                $imagePath = $bundled;
+            }
+        }
+
+        if (! $imagePath) {
             return null;
         }
 
-        if (str_starts_with($this->image, 'http://') || str_starts_with($this->image, 'https://')) {
-            return $this->image;
+        if (str_starts_with($imagePath, 'http://') || str_starts_with($imagePath, 'https://')) {
+            return $imagePath;
         }
 
-        if (str_starts_with($this->image, 'images/')) {
-            return asset($this->image);
+        if (str_starts_with($imagePath, 'images/')) {
+            return asset($imagePath);
         }
 
-        return asset('storage/'.ltrim($this->image, '/'));
+        return asset('storage/'.ltrim($imagePath, '/'));
     }
 
     /** True only when $this->image points to an uploaded file on Storage::disk('public'). */

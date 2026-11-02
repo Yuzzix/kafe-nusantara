@@ -1,20 +1,26 @@
 @extends('layouts.app')
 
+@php
+    $canProcessPayment = ! isset($activeStaff) || ! $activeStaff || $activeStaff->canProcessPayment();
+@endphp
+
 @section('title', 'Detail Pesanan '.$order->order_number)
 @section('breadcrumb')
-    <a href="{{ route('orders.index') }}" class="hover:text-copper">Beranda / Pesanan & Kasir</a> / {{ $order->order_number }}
+    <a href="{{ route('orders.index') }}" class="hover:text-copper">Beranda / {{ $canProcessPayment ? 'Pesanan & Kasir' : 'Pesanan Pelanggan' }}</a> / {{ $order->order_number }}
 @endsection
 @section('page_title', 'Rincian Pesanan')
 
 @section('header_actions')
-    <button type="button"
-            onclick="document.getElementById('receipt-preview-modal')?.classList.remove('hidden')"
-            class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-copper hover:bg-copper-dark text-white text-xs font-semibold shadow-2xs transition cursor-pointer">
-        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/>
-        </svg>
-        <span>Cetak Struk</span>
-    </button>
+    @if ($canProcessPayment || $order->isPaid())
+        <button type="button"
+                onclick="document.getElementById('receipt-preview-modal')?.classList.remove('hidden')"
+                class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-copper hover:bg-copper-dark text-white text-xs font-semibold shadow-2xs transition cursor-pointer">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/>
+            </svg>
+            <span>Cetak Struk</span>
+        </button>
+    @endif
 @endsection
 
 @section('content')
@@ -252,6 +258,16 @@
                 <div class="rounded-xl bg-clay-tint border border-clay/25 p-4 text-xs text-clay">
                     <p class="font-bold text-sm mb-1">Pesanan Dibatalkan</p>
                     <p>Pesanan yang telah dibatalkan tidak memerlukan pembayaran.</p>
+                </div>
+            @elseif (! $canProcessPayment)
+                <div class="rounded-lg bg-saffron-tint border border-saffron/30 p-4 space-y-2.5 text-xs">
+                    <p class="font-bold text-sm text-saffron">Serahkan Pembayaran ke Kasir</p>
+                    <p class="text-teak leading-relaxed">
+                        Peran <strong>{{ $activeStaff?->role_label ?? 'Pelayan' }}</strong> tidak memiliki akses laci pembayaran kasir.
+                        Silakan arahkan pelanggan ke meja Kasir dengan menyebutkan nomor pesanan
+                        <strong class="tabular-nums">{{ $order->order_number }}</strong>
+                        senilai <strong class="tabular-nums">{{ $order->formatted_total }}</strong>.
+                    </p>
                 </div>
             @else
                 {{-- Interactive Cashier Payment Form (Matches PDF Page 6) --}}

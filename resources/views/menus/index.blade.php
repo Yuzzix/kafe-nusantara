@@ -1,17 +1,23 @@
 @extends('layouts.app')
 
-@section('title', 'Daftar Menu')
-@section('breadcrumb', 'Beranda / Master Katalog / Daftar Menu')
-@section('page_title', 'Daftar Menu')
+@php
+    $canManageCatalog = ! isset($activeStaff) || ! $activeStaff || $activeStaff->canManageCatalog();
+@endphp
+
+@section('title', $canManageCatalog ? 'Daftar Menu' : 'Stok Harian Menu')
+@section('breadcrumb', $canManageCatalog ? 'Beranda / Master Katalog / Daftar Menu' : 'Beranda / Katalog & Stok / Stok Harian Menu')
+@section('page_title', $canManageCatalog ? 'Daftar Menu' : 'Stok Harian Menu')
 
 @section('header_actions')
-    <a href="{{ route('menus.create') }}"
-       class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-copper hover:bg-copper-dark text-white text-xs font-semibold shadow-2xs transition">
-        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-            <path stroke-linecap="round" d="M12 5v14M5 12h14"/>
-        </svg>
-        <span>Tambah Menu Baru</span>
-    </a>
+    @if ($canManageCatalog)
+        <a href="{{ route('menus.create') }}"
+           class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-copper hover:bg-copper-dark text-white text-xs font-semibold shadow-2xs transition">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <path stroke-linecap="round" d="M12 5v14M5 12h14"/>
+            </svg>
+            <span>Tambah Menu Baru</span>
+        </a>
+    @endif
 @endsection
 
 @section('content')
@@ -81,7 +87,9 @@
                             <th class="px-4 py-3">Kategori</th>
                             <th class="px-4 py-3">Harga</th>
                             <th class="px-4 py-3">Stok Harian</th>
-                            <th class="pl-4 pr-5 py-3 text-right">Aksi</th>
+                            @if ($canManageCatalog)
+                                <th class="pl-4 pr-5 py-3 text-right">Aksi</th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-sand/70">
@@ -115,9 +123,13 @@
 
                                 <td class="px-4 py-3 text-xs font-medium text-taupe">
                                     @if ($menu->category)
-                                        <a href="{{ route('categories.show', $menu->category->slug) }}" class="hover:text-copper hover:underline">
-                                            {{ $menu->category->name }}
-                                        </a>
+                                        @if ($canManageCatalog)
+                                            <a href="{{ route('categories.show', $menu->category->slug) }}" class="hover:text-copper hover:underline">
+                                                {{ $menu->category->name }}
+                                            </a>
+                                        @else
+                                            <span>{{ $menu->category->name }}</span>
+                                        @endif
                                     @else
                                         <span>-</span>
                                     @endif
@@ -139,27 +151,29 @@
                                     </form>
                                 </td>
 
-                                <td class="pl-4 pr-5 py-3 text-right">
-                                    <div class="inline-flex items-center gap-1.5">
-                                        <a href="{{ route('menus.edit', $menu->slug) }}"
-                                           class="px-2.5 py-1 rounded border border-sand text-xs font-semibold text-teak hover:border-copper hover:text-copper transition">
-                                            Edit
-                                        </a>
-                                        <form action="{{ route('menus.destroy', $menu->slug) }}"
-                                              method="POST"
-                                              onsubmit="return confirm('Arsipkan menu {{ $menu->name }} dari katalog?')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit"
-                                                    title="Arsipkan menu"
-                                                    class="p-1.5 rounded text-taupe/70 hover:text-clay hover:bg-clay-tint transition cursor-pointer">
-                                                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                                                </svg>
-                                            </button>
-                                        </form>
-                                    </div>
-                                </td>
+                                @if ($canManageCatalog)
+                                    <td class="pl-4 pr-5 py-3 text-right">
+                                        <div class="inline-flex items-center gap-1.5">
+                                            <a href="{{ route('menus.edit', $menu->slug) }}"
+                                               class="px-2.5 py-1 rounded border border-sand text-xs font-semibold text-teak hover:border-copper hover:text-copper transition">
+                                                Edit
+                                            </a>
+                                            <form action="{{ route('menus.destroy', $menu->slug) }}"
+                                                  method="POST"
+                                                  onsubmit="return confirm('Arsipkan menu {{ $menu->name }} dari katalog?')">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit"
+                                                        title="Arsipkan menu"
+                                                        class="p-1.5 rounded text-taupe/70 hover:text-clay hover:bg-clay-tint transition cursor-pointer">
+                                                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                                    </svg>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                @endif
                             </tr>
                         @endforeach
                     </tbody>

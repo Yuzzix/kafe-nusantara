@@ -7,6 +7,7 @@ use App\Models\DiningTable;
 use App\Models\Menu;
 use App\Models\Order;
 use App\Models\Payment;
+use App\Models\User;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -193,5 +194,50 @@ class RestaurantPosFlowTest extends TestCase
                 $soldOutMenu->id => ['quantity' => 1],
             ],
         ])->assertSessionHasErrors('items');
+    }
+
+    public function test_shift_role_permissions_adapt_workspace_and_restrict_unauthorized_routes(): void
+    {
+        $kitchenStaff = User::where('role', User::ROLE_KITCHEN)->where('is_active', true)->firstOrFail();
+        $waiterStaff = User::where('role', User::ROLE_WAITER)->where('is_active', true)->firstOrFail();
+        $cashierStaff = User::where('role', User::ROLE_CASHIER)->where('is_active', true)->firstOrFail();
+        $unpaidOrder = Order::where('payment_status', Order::PAYMENT_UNPAID)->where('status', '!=', Order::STATUS_CANCELLED)->firstOrFail();
+
+        // 1. Switching from Dashboard to Dapur lands directly on Layar Dapur and restricts cashier/catalog CRUD
+        $this->from(route('dashboard'))
+            ->post(route('staff.switch'), ['staff_id' => $kitchenStaff->id])
+            ->assertRedirect(route('kitchen.index'));
+
+        $this->get(route('orders.index'))->assertRedirect(route('kitchen.index'));
+        $this->get(route('menus.index'))
+            ->assertOk()
+            ->assertSee('Stok Harian Menu')
+            ->assertDontSee('Tambah Menu Baru');
+
+        // 2. Switching to Pelayan lands on Status Meja, allows viewing orders, but locks payment drawer
+        $this->from(route('kitchen.index'))
+            ->post(route('staff.switch'), ['staff_id' => $waiterStaff->id])
+            ->assertRedirect(route('tables.index'));
+
+        $this->get(route('orders.show', $unpaidOrder->order_number))
+            ->assertOk()
+            ->assertSee('Serahkan Pembayaran ke Kasir');
+
+        $this->post(route('orders.pay', $unpaidOrder->order_number), [
+            'method' => Payment::METHOD_CASH,
+            'received_amount' => 500000,
+        ])->assertRedirect(route('tables.index'));
+
+        // 3. Switching to Kasir unlocks cashier register & daily shift dashboard, while keeping catalog CRUD Admin-only
+        $this->from(route('orders.show', $unpaidOrder->order_number))
+            ->post(route('staff.switch'), ['staff_id' => $cashierStaff->id])
+            ->assertRedirect(route('orders.show', $unpaidOrder->order_number));
+
+        $this->get(route('dashboard'))
+            ->assertOk()
+            ->assertSee('Ringkasan Shift Kasir')
+            ->assertDontSee('Pendapatan 30 Hari');
+
+        $this->get(route('categories.create'))->assertRedirect(route('dashboard'));
     }
 }

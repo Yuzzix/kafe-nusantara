@@ -38,21 +38,45 @@
     </div>
 </div>
 
+@php
+    $cmdItems = array_values(array_filter([
+        (! isset($activeStaff) || ! $activeStaff || $activeStaff->canAccessOrders())
+            ? ['title' => 'Buat Pesanan Baru', 'group' => 'Aksi Cepat', 'hint' => 'Transaksi baru', 'url' => route('orders.create'), 'keywords' => 'order baru pos kasir tambah pesanan meja takeaway']
+            : null,
+        (! isset($activeStaff) || ! $activeStaff || $activeStaff->canViewKitchen())
+            ? ['title' => 'Buka Layar Dapur (Kitchen Display)', 'group' => 'Aksi Cepat', 'hint' => 'Antrean masak', 'url' => route('kitchen.index'), 'keywords' => 'dapur kds kitchen masak antrean saji']
+            : null,
+        ['title' => 'Buka Buku Menu Digital Tamu', 'group' => 'Pengalaman Tamu', 'hint' => 'Tampilan QR pelanggan', 'url' => route('menu-book'), 'keywords' => 'buku menu tamu digital customer qr'],
+        (! isset($activeStaff) || ! $activeStaff || $activeStaff->canManageCatalog())
+            ? ['title' => 'Tambah Sajian / Menu Baru', 'group' => 'Aksi Cepat', 'hint' => 'Form katalog', 'url' => route('menus.create'), 'keywords' => 'tambah menu baru makanan minuman foto']
+            : null,
+        (! isset($activeStaff) || ! $activeStaff || $activeStaff->canManageCatalog())
+            ? ['title' => 'Tambah Kategori Menu', 'group' => 'Aksi Cepat', 'hint' => 'Kelompok baru', 'url' => route('categories.create'), 'keywords' => 'tambah kategori baru']
+            : null,
+        (! isset($activeStaff) || ! $activeStaff || $activeStaff->canViewDashboard())
+            ? ['title' => 'Ringkasan Gerai', 'group' => 'Navigasi', 'hint' => 'KPI & antrean aktif', 'url' => route('dashboard'), 'keywords' => 'dashboard ringkasan gerai omzet laporan terlaris']
+            : null,
+        (! isset($activeStaff) || ! $activeStaff || $activeStaff->canManageCatalog())
+            ? ['title' => 'Kategori Menu', 'group' => 'Navigasi', 'hint' => 'Master-Detail kategori', 'url' => route('categories.index'), 'keywords' => 'kategori makanan kopi camilan dessert']
+            : null,
+        (! isset($activeStaff) || ! $activeStaff || $activeStaff->canViewMenuCatalog())
+            ? ['title' => 'Daftar Menu & Stok Harian', 'group' => 'Navigasi', 'hint' => '36 sajian katalog', 'url' => route('menus.index'), 'keywords' => 'daftar menu katalog harga tersedia habis stok']
+            : null,
+        (! isset($activeStaff) || ! $activeStaff || $activeStaff->canAccessOrders())
+            ? ['title' => 'Pesanan & Kasir', 'group' => 'Navigasi', 'hint' => 'Daftar transaksi', 'url' => route('orders.index'), 'keywords' => 'pesanan kasir bayar lunas struk']
+            : null,
+        (! isset($activeStaff) || ! $activeStaff || $activeStaff->canManageTables())
+            ? ['title' => 'Status Meja & QR Area', 'group' => 'Navigasi', 'hint' => 'Indoor, Outdoor, & VIP', 'url' => route('tables.index'), 'keywords' => 'status meja vip indoor outdoor reservasi']
+            : null,
+        (! isset($activeStaff) || ! $activeStaff || $activeStaff->canProcessPayment())
+            ? ['title' => 'Unduh Laporan Transaksi (CSV)', 'group' => 'Laporan', 'hint' => 'Ekspor Excel/CSV', 'url' => route('orders.export'), 'keywords' => 'unduh ekspor csv excel laporan']
+            : null,
+    ]));
+@endphp
+
 <script>
     (function () {
-        const COMMANDS = [
-            { title: 'Buat Pesanan Baru (POS Kasir)', group: 'Aksi Cepat', hint: 'Transaksi baru', url: @json(route('orders.create')), keywords: 'order baru pos kasir tambah pesanan meja takeaway' },
-            { title: 'Buka Layar Dapur (Kitchen Display)', group: 'Aksi Cepat', hint: 'Antrean masak', url: @json(route('kitchen.index')), keywords: 'dapur kds kitchen masak antrean saji' },
-            { title: 'Buka Buku Menu Digital Tamu', group: 'Pengalaman Tamu', hint: 'Tampilan QR pelanggan', url: @json(route('menu-book')), keywords: 'buku menu tamu digital customer qr' },
-            { title: 'Tambah Sajian / Menu Baru', group: 'Aksi Cepat', hint: 'Form katalog', url: @json(route('menus.create')), keywords: 'tambah menu baru makanan minuman foto' },
-            { title: 'Tambah Kategori Menu', group: 'Aksi Cepat', hint: 'Kelompok baru', url: @json(route('categories.create')), keywords: 'tambah kategori baru' },
-            { title: 'Ringkasan Gerai (Dashboard)', group: 'Navigasi', hint: 'KPI & grafik 7 hari', url: @json(route('dashboard')), keywords: 'dashboard ringkasan gerai omzet laporan terlaris' },
-            { title: 'Kategori Menu', group: 'Navigasi', hint: 'Master-Detail kategori', url: @json(route('categories.index')), keywords: 'kategori makanan kopi camilan dessert' },
-            { title: 'Daftar Menu Nusantara', group: 'Navigasi', hint: '36 sajian katalog', url: @json(route('menus.index')), keywords: 'daftar menu katalog harga tersedia habis' },
-            { title: 'Pesanan & Kasir', group: 'Navigasi', hint: 'Daftar transaksi & pembayaran', url: @json(route('orders.index')), keywords: 'pesanan kasir bayar lunas struk' },
-            { title: 'Status Meja & QR Area', group: 'Navigasi', hint: 'Indoor, Outdoor, & VIP', url: @json(route('tables.index')), keywords: 'status meja vip indoor outdoor reservasi' },
-            { title: 'Unduh Laporan Transaksi (CSV)', group: 'Laporan', hint: 'Ekspor Excel/CSV', url: @json(route('orders.export')), keywords: 'unduh ekspor csv excel laporan' },
-        ];
+        const COMMANDS = @json($cmdItems);
 
         const SEARCH_BASE = @json(route('workspace.search'));
         const backdrop = document.getElementById('kn-cmd-backdrop');

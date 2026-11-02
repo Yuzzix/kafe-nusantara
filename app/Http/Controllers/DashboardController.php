@@ -99,42 +99,55 @@ class DashboardController extends Controller
         ));
     }
 
-    /** Global workspace search ("Cari di ruang kerja...") */
+    /** Global workspace search ("Cari di ruang kerja...") filtered by active shift role. */
     public function search(Request $request): View
     {
         $q = trim((string) $request->query('q', ''));
+        $staff = User::currentShiftStaff();
 
         $categories = collect();
         $menus = collect();
         $orders = collect();
 
         if ($q !== '') {
-            $categories = Category::withCount('menus')
-                ->where('name', 'like', "%{$q}%")
-                ->orWhere('description', 'like', "%{$q}%")
-                ->orderBy('sort_order')
-                ->limit(6)
-                ->get();
+            if (! $staff || $staff->canManageCatalog()) {
+                $categories = Category::withCount('menus')
+                    ->where(function ($query) use ($q) {
+                        $query->where('name', 'like', "%{$q}%")
+                            ->orWhere('description', 'like', "%{$q}%");
+                    })
+                    ->orderBy('sort_order')
+                    ->limit(6)
+                    ->get();
+            }
 
-            $menus = Menu::with('category')
-                ->where('name', 'like', "%{$q}%")
-                ->orWhere('description', 'like', "%{$q}%")
-                ->orderByDesc('is_featured')
-                ->limit(10)
-                ->get();
+            if (! $staff || $staff->canViewMenuCatalog() || $staff->canAccessOrders()) {
+                $menus = Menu::with('category')
+                    ->where(function ($query) use ($q) {
+                        $query->where('name', 'like', "%{$q}%")
+                            ->orWhere('description', 'like', "%{$q}%");
+                    })
+                    ->orderByDesc('is_featured')
+                    ->limit(10)
+                    ->get();
+            }
 
-            $orders = Order::with(['diningTable', 'user'])
-                ->where('order_number', 'like', "%{$q}%")
-                ->orWhere('customer_name', 'like', "%{$q}%")
-                ->latest()
-                ->limit(10)
-                ->get();
+            if (! $staff || $staff->canAccessOrders()) {
+                $orders = Order::with(['diningTable', 'user'])
+                    ->where(function ($query) use ($q) {
+                        $query->where('order_number', 'like', "%{$q}%")
+                            ->orWhere('customer_name', 'like', "%{$q}%");
+                    })
+                    ->latest()
+                    ->limit(10)
+                    ->get();
+            }
         }
 
         return view('dashboard.search', compact('q', 'categories', 'menus', 'orders'));
     }
 
-    /** Switch active staff member on shift from the sidebar footer. */
+    /** Switch active staff member on shift from the sidebar footer and adapt workspace route. */
     public function switchStaff(Request $request): RedirectResponse
     {
         $validated = $request->validate([
@@ -144,6 +157,25 @@ class DashboardController extends Controller
         $staff = User::where('is_active', true)->findOrFail($validated['staff_id']);
         session(['active_staff_id' => $staff->id]);
 
-        return back()->with('success', "Shift aktif dialihkan ke {$staff->name} ({$staff->role_label}).");
+        $prevPath = trim((string) parse_url(url()->previous(), PHP_URL_PATH), '/');
+        $canStayOnCurrentPage = match (true) {
+            $prevPath === '' => $staff->canViewDashboard(),
+            $prevPath === 'dapur' => $staff->canViewKitchen(),
+            str_starts_with($prevPath, 'categories') => $staff->canManageCatalog(),
+            str_starts_with($prevPath, 'menus/') => $staff->canManageCatalog(),
+            $prevPath === 'menus' => $staff->canViewMenuCatalog(),
+            $prevPath === 'orders/export' => $staff->canProcessPayment(),
+            str_starts_with($prevPath, 'orders') => $staff->canAccessOrders(),
+            str_starts_with($prevPath, 'tables') => $staff->canManageTables(),
+            default => true,
+        };
+
+        $message = "Shift aktif dialihkan ke {$staff->name} ({$staff->role_label}).";
+
+        if (! $canStayOnCurrentPage) {
+            return redirect()->route($staff->defaultRouteName())->with('success', $message);
+        }
+
+        return back()->with('success', $message);
     }
 }

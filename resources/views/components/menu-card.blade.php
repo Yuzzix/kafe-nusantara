@@ -26,13 +26,15 @@
         <div class="p-4 pb-2">
             <div class="flex items-start justify-between gap-2">
                 <h3 class="text-sm font-bold text-teak leading-snug">{{ $menu->name }}</h3>
-                <a href="{{ route('menus.edit', $menu->slug) }}"
-                   title="Edit menu"
-                   class="text-taupe/70 hover:text-copper p-1 -mr-1 -mt-0.5 rounded transition shrink-0">
-                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
-                    </svg>
-                </a>
+                @if (! isset($activeStaff) || ! $activeStaff || $activeStaff->canManageCatalog())
+                    <a href="{{ route('menus.edit', $menu->slug) }}"
+                       title="Edit menu"
+                       class="text-taupe/70 hover:text-copper p-1 -mr-1 -mt-0.5 rounded transition shrink-0">
+                        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
+                        </svg>
+                    </a>
+                @endif
             </div>
 
             <p class="text-xs text-taupe mt-1 leading-relaxed line-clamp-2">

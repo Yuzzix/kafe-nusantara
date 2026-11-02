@@ -26,39 +26,48 @@ class AppServiceProvider extends ServiceProvider
     {
         Carbon::setLocale('id');
 
-        View::composer('partials.sidebar', function ($view): void {
-            $staffList = collect();
-            $activeStaff = null;
-            $kitchenQueueCount = 0;
+        View::composer('*', function ($view): void {
+            static $cachedSessionId = null;
+            static $resolved = null;
 
-            try {
-                if (Schema::hasTable('users')) {
-                    $staffList = User::where('is_active', true)->orderBy('id')->get();
-                    $staffId = session('active_staff_id');
+            $currentSessionStaffId = session('active_staff_id');
 
-                    $activeStaff = $staffId
-                        ? $staffList->firstWhere('id', (int) $staffId)
-                        : null;
+            if ($resolved === null || $cachedSessionId !== $currentSessionStaffId) {
+                $cachedSessionId = $currentSessionStaffId;
+                $staffList = collect();
+                $activeStaff = null;
+                $kitchenQueueCount = 0;
 
-                    $activeStaff ??= $staffList->firstWhere('email', 'kasir@kafe.test')
-                        ?? $staffList->first();
+                try {
+                    if (Schema::hasTable('users')) {
+                        $staffList = User::where('is_active', true)->orderBy('id')->get();
+
+                        $activeStaff = $currentSessionStaffId
+                            ? $staffList->firstWhere('id', (int) $currentSessionStaffId)
+                            : null;
+
+                        $activeStaff ??= $staffList->firstWhere('role', User::ROLE_ADMIN)
+                            ?? $staffList->first();
+                    }
+
+                    if (Schema::hasTable('orders')) {
+                        $kitchenQueueCount = Order::whereIn('status', [
+                            Order::STATUS_PENDING,
+                            Order::STATUS_PREPARING,
+                        ])->count();
+                    }
+                } catch (\Throwable) {
+                    // Safe fallback if database is not migrated yet.
                 }
 
-                if (Schema::hasTable('orders')) {
-                    $kitchenQueueCount = Order::whereIn('status', [
-                        Order::STATUS_PENDING,
-                        Order::STATUS_PREPARING,
-                    ])->count();
-                }
-            } catch (\Throwable) {
-                // Safe fallback if database is not migrated yet.
+                $resolved = [
+                    'staffList' => $staffList,
+                    'activeStaff' => $activeStaff,
+                    'kitchenQueueCount' => $kitchenQueueCount,
+                ];
             }
 
-            $view->with([
-                'staffList' => $staffList,
-                'activeStaff' => $activeStaff,
-                'kitchenQueueCount' => $kitchenQueueCount,
-            ]);
+            $view->with($resolved);
         });
     }
 }
